@@ -1,0 +1,15 @@
+{
+  "name": "smc",
+  "version": "0.0.1",
+  "description": "this is a state management control system to help you forget about redux complexity",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "global",
+    "state"
+  ],
+  "author": "Alex Flok",
+  "license": "ISC"
+}
