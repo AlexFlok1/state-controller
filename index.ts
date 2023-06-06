@@ -11,8 +11,25 @@ listner.addEventListener('test', () => {
 
 import { Portion, store } from './models';
 
-// testing out protion class
-const a = new Portion({ name: 'test', defaultValue: [{ a: 1 }], actions: [] });
-const b = new Portion({ name: 'test2', defaultValue: [{ b: 1 }], actions: [] });
+type b = {
+  test: number;
+  test2: number;
+};
 
-console.log(store.getValue());
+// testing out protion class
+const a = new Portion<{ a: number }>({
+  name: 'test',
+  portionValue: { a: 1 },
+  actions: [
+    {
+      name: 'test method',
+      action: (args: b) => {
+        console.log(args);
+      },
+    },
+  ],
+});
+
+const res = a.callAction('test method');
+
+if (res) res({ test: 1, test2: 2 });

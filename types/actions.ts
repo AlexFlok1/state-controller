@@ -1,4 +1,4 @@
-export type Action = {
+export type Action<T> = {
   name: string;
-  action: ((args: unknown) => void) | ((args: unknown) => Promise<void>);
+  action: ((args: T) => void) | ((args: T) => Promise<void>);
 };
