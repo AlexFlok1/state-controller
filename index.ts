@@ -10,20 +10,23 @@ listner.addEventListener('test', () => {
 });*/
 
 import { Portion, store } from './models';
+import type { Action } from './types/actions';
 
 type b = {
   test: number;
   test2: number;
 };
 
+type ActionsArray = [Action<b>];
+
 // testing out protion class
-const a = new Portion<{ a: number }>({
+const a = new Portion<{ a: number }, ActionsArray>({
   name: 'test',
   portionValue: { a: 1 },
   actions: [
     {
       name: 'test method',
-      action: (args: b) => {
+      action: (args) => {
         console.log(args);
       },
     },

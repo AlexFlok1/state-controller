@@ -1,7 +1,7 @@
-import { Action } from './actions';
+import type { Action } from './actions';
 
-export type PortionT<T> = {
+export type PortionT<T, K> = {
   name: string;
   portionValue: T;
-  actions: Action<any>[];
+  actions: K;
 };

@@ -1,10 +1,12 @@
 import { PortionT } from '../types/protion';
 import { store } from './store';
 
-export class Portion<T> {
-  private _portion: PortionT<T>;
+import type { Action } from '../types/actions';
 
-  constructor(args: PortionT<T>) {
+export class Portion<T, K extends Action<any>[]> {
+  private _portion: PortionT<T, K>;
+
+  constructor(args: PortionT<T, K>) {
     this._portion = args;
     try {
       store.setValue(args.name, args.portionValue);
@@ -22,6 +24,11 @@ export class Portion<T> {
   }
 
   public callAction(name: string) {
-    return this._portion.actions.find((el) => el.name === name)?.action;
+    const action = this._portion.actions.find((el) => el.name === name)?.action;
+    if (action) {
+      return (...args: Parameters<typeof action>) =>
+        action.call(this._portion, ...args);
+    }
+    return undefined;
   }
 }
