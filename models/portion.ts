@@ -24,11 +24,11 @@ export class Portion<T, K extends Action<any>[]> {
   }
 
   public callAction(name: string) {
-    const action = this._portion.actions.find((el) => el.name === name)?.action;
-    if (action) {
-      return (...args: Parameters<typeof action>) =>
-        action.call(this._portion, ...args);
-    }
+    const indx = this._portion.actions.findIndex((el) => el.name === name);
+    if (indx > 0)
+      return (args: K[typeof indx] extends Action<infer B> ? B : never) =>
+        this._portion.actions[indx].action(args);
+
     return undefined;
   }
 }
