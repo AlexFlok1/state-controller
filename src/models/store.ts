@@ -1,19 +1,32 @@
+import { EventHandler } from "./event";
+
 class Store {
-  private _store: typeof window.smcMainStore;
+  private _store: Record<string, any>;
+  private _events: Map<string, EventHandler>;
   constructor() {
     this._store = {};
+    this._events = new Map<string, EventHandler>();
   }
 
   public setValue<T>(key: string, value: T) {
     if (this._store[key]) throw new Error(`The keys: ${key} already exists`);
 
     this._store[key] = value;
-    if (typeof window !== "undefined") window.smcMainStore = this._store;
   }
 
-  public getValueByKey(key: keyof typeof window.smcMainStore) {
+  public getValueByKey(key: keyof typeof this._store) {
     return this._store[key];
   }
+
+  public addEvent = (key: string, value: EventHandler) => {
+    this._events.set(key, value);
+  };
+
+  public removeEvent = (key: string, value: typeof EventHandler) => {
+    this._events.delete(key);
+  };
+
+  public getEvent = (key: string) => this._events.get(key);
 
   public getValue() {
     return this._store;

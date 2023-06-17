@@ -1,9 +1,15 @@
 import { useMemo, useState } from "react";
+import { store } from "../models/store";
 
 const useSMCSelector = (portionName: string | void) => {
-  const [data, setData] = useState(window.smcMainStore);
+  const [data, setData] = useState(store);
 
-  useMemo(() => {}, [portionName]);
+  useMemo(() => {
+    if (portionName)
+      store.getEvent(portionName)?.subscribe(() => {
+        setData(store[portionName]);
+      });
+  }, [portionName]);
 
   return data;
 };

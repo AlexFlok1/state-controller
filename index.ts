@@ -1,5 +1,3 @@
-/// <reference path="./src/declarations/global.d.ts" />
-
 import { Portion } from "./src/models";
 import type { Action } from "./src/types/actions";
 
@@ -38,7 +36,5 @@ const b = new Portion<{ b: number }, ActionsArray>({
 });
 
 const res = a.callAction("test method");
-
-console.log(window.smcMainStore);
 
 if (res) res({ test: 1, test2: 2 });

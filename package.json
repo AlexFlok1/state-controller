@@ -4,7 +4,8 @@
   "description": "this is a state management control system to help you forget about redux complexity",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node index.ts"
   },
   "keywords": [
     "global",
@@ -12,10 +13,10 @@
   ],
   "author": "Alex Flok",
   "license": "ISC",
-  "dependencies": {},
   "devDependencies": {
     "@types/react": "^18.2.12",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "ts-node": "^10.9.1"
   }
 }
