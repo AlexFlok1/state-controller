@@ -1,10 +1,10 @@
-import { EventT } from '../../types/event';
+import { EventT } from "../types/event";
 
 class EventHandler {
   private _name: string;
   private _listner: EventTarget;
   private _event: Event;
-  private _method: (args: unknown) => void;
+  private _method: ((args: unknown) => void) | undefined;
 
   constructor(args: EventT) {
     this._name = args.name;
@@ -17,10 +17,13 @@ class EventHandler {
   }
 
   public subscribe(method: (args: unknown) => void) {
+    this._method = method;
     this._listner.addEventListener(this._name, method);
   }
 
   public unsubscribe() {
-    this._listner.removeEventListener(this._name, this._method);
+    if (this._method) this._listner.removeEventListener(this._name, this._method);
   }
 }
+
+export { EventHandler };

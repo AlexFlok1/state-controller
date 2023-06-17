@@ -1,4 +1,3 @@
-/// <reference path="../modules/global.d.ts" />
 class Store {
   private _store: typeof window.smcMainStore;
   constructor() {
@@ -9,7 +8,7 @@ class Store {
     if (this._store[key]) throw new Error(`The keys: ${key} already exists`);
 
     this._store[key] = value;
-    if (typeof window !== 'undefined') window.smcMainStore = this._store;
+    if (typeof window !== "undefined") window.smcMainStore = this._store;
   }
 
   public getValueByKey(key: keyof typeof window.smcMainStore) {
