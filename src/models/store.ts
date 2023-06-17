@@ -22,7 +22,7 @@ class Store {
     this._events.set(key, value);
   };
 
-  public removeEvent = (key: string, value: typeof EventHandler) => {
+  public removeEvent = (key: string) => {
     this._events.delete(key);
   };
 

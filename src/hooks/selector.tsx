@@ -8,10 +8,12 @@ const useSMCSelector = (portionName: string | void) => {
     if (portionName)
       store.getEvent(portionName)?.subscribe(() => {
         setData(store[portionName]);
+        store.getEvent(portionName)?.unsubscribe();
+        store.removeEvent(portionName);
       });
   }, [portionName]);
 
-  return data;
+  return { data };
 };
 
 export default useSMCSelector;

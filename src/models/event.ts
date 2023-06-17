@@ -1,4 +1,5 @@
 import { EventT } from "../types/event";
+import { store } from "./store";
 
 class EventHandler {
   private _name: string;
