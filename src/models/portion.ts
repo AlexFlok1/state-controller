@@ -25,7 +25,7 @@ export class Portion<T, K extends Action<any>[]> {
 
   public callAction(name: string) {
     const indx = this._portion.actions.findIndex((el) => el.name === name);
-    if (indx > 0)
+    if (indx >= 0)
       return (args: K[typeof indx] extends Action<infer B> ? B : never) =>
         this._portion.actions[indx].action(args);
 

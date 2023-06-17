@@ -1,4 +1,4 @@
-import { EventT } from '../types/event';
+import { EventT } from '../../types/event';
 
 class EventHandler {
   private _name: string;

@@ -1,5 +1,5 @@
-import { Portion, store } from './models';
-import type { Action } from './types/actions';
+import { Portion, store } from './src/models';
+import type { Action } from './src/types/actions';
 
 type b = {
   test: number;
@@ -15,7 +15,7 @@ const a = new Portion<{ a: number }, ActionsArray>({
   actions: [
     {
       name: 'test method',
-      action: (args) => {
+      action: async (args) => {
         console.log(args);
       },
     },
