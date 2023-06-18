@@ -2,10 +2,10 @@
   "name": "smc",
   "version": "0.0.1",
   "description": "this is a state management control system to help you forget about redux complexity",
-  "main": "index.ts",
+  "main": "src/main.tsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node index.ts"
+    "start": "react-scripts start --max-workers=1 --entry src/main.tsx"
   },
   "keywords": [
     "global",
@@ -14,9 +14,24 @@
   "author": "Alex Flok",
   "license": "ISC",
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/react": "^18.2.12",
+    "@types/react-dom": "^18.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1",
     "ts-node": "^10.9.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
