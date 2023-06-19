@@ -7,29 +7,18 @@ type b = {
   test2: number;
 };
 
-type ActionsArray = [Action<b>];
+type PortionDefaultValue = { test: number; test2: number };
 
-const a = new Portion<{ test: number; test2: number }, ActionsArray>({
+type ActionsArray = [Action<b, PortionDefaultValue>];
+
+const a = new Portion<PortionDefaultValue, ActionsArray>({
   name: "test",
   portionValue: { test: 1, test2: 1 },
   actions: [
     {
       name: "test method",
-      action: async (args) => {
-        store.setValue("test", args);
-      },
-    },
-  ],
-});
-
-const b = new Portion<{ b: number }, ActionsArray>({
-  name: "test2",
-  portionValue: { b: 1 },
-  actions: [
-    {
-      name: "test method",
-      action: async (args) => {
-        console.log(args);
+      action: async (args, state) => {
+        store.setValue("test", { ...state, test: args.test });
       },
     },
   ],

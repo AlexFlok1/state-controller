@@ -1,4 +1,4 @@
-import { Portion } from "./src/models";
+/* import { Portion } from "./src/models";
 import type { Action } from "./src/types/actions";
 
 type b = {
@@ -37,4 +37,4 @@ const b = new Portion<{ b: number }, ActionsArray>({
 
 const res = a.callAction("test method");
 
-if (res) res({ test: 1, test2: 2 });
+if (res) res({ test: 1, test2: 2 }); */

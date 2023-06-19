@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { store } from "../models/store";
 
 const useSMCSelector = (portionName: string | void, triggers: string[] | void) => {
-  const [data, setData] = useState(store.getValue());
+  const [data, setData] = useState(portionName ? store.getValueByKey(portionName) : store.getValue());
 
   useMemo(() => {
     if (portionName && triggers)

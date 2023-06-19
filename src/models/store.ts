@@ -9,8 +9,6 @@ class Store {
   }
 
   public setValue<T>(key: string, value: T) {
-    // if (this._store[key]) throw new Error(`The keys: ${key} already exists`);
-
     this._store[key] = value;
   }
 
