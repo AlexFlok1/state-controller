@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { store } from "../models/store";
 
-const useSMCSelector = (portionName: string | void, triggers: string[] | void) => {
-  const [data, setData] = useState(portionName ? store.getValueByKey(portionName) : store.getValue());
+export default function useSMCSelector<T = any>(portionName: string | void, triggers: string[] | void) {
+  const [data, setData] = useState<T>(portionName ? store.getValueByKey(portionName) : store.getValue());
 
   useMemo(() => {
     if (portionName && triggers)
@@ -14,6 +14,4 @@ const useSMCSelector = (portionName: string | void, triggers: string[] | void) =
   }, [portionName]);
 
   return { data };
-};
-
-export default useSMCSelector;
+}

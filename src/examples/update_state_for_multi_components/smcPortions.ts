@@ -7,7 +7,7 @@ type b = {
   test2: number;
 };
 
-type PortionDefaultValue = { test: number; test2: number };
+export type PortionDefaultValue = { test: number; test2: number };
 
 type ActionsArray = [Action<b, PortionDefaultValue>];
 

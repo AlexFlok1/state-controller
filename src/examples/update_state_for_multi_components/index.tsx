@@ -4,7 +4,7 @@ import Comp2 from "./component2";
 import { testAction } from "./smcPortions";
 
 const Example1 = () => {
-  const handleTestAction = () => {
+  const handleTestAction = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     testAction({ test: Math.random(), test2: Math.random() });
   };
   return (
@@ -13,7 +13,7 @@ const Example1 = () => {
       <br />
       <Comp2 />
       <br />
-      <button onClick={handleTestAction}>Update State</button>
+      <button onClick={(e) => handleTestAction(e)}>Update State</button>
     </>
   );
 };
