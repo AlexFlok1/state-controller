@@ -1,10 +1,20 @@
-import React from "react";
-import useSMCSelector from "../../../hooks/selector";
-import { PortionDefaultValue } from "../smcPortions";
+import React, { useEffect, useState } from "react";
+import useSegment from "../../../hooks/useSegment";
 
 const Comp1 = () => {
-  const { data } = useSMCSelector<PortionDefaultValue>("test", ["test method"]);
-  return <>{data && <span>Comp1: {data.test}</span>}</>;
+  const [val, setVal] = useState("Hello");
+
+  const segment = useSegment<{ val1: string; val2: string }>({ name: "test" });
+
+  useEffect(() => {
+    console.log("render");
+  }, []);
+
+  segment.watch("val1", (value) => {
+    setVal(value);
+  });
+
+  return <>{val}</>;
 };
 
 export default Comp1;

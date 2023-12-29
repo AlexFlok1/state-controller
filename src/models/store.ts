@@ -1,36 +1,28 @@
-import { EventHandler } from "./event";
+/* SMC 2023 */
+import Segment from "./segment";
 
-class Store {
-  private _store: Record<string, any>;
-  private _events: Map<string, EventHandler>;
+class SMCStore {
+  #store: Map<string, Segment<any>>;
+
   constructor() {
-    this._store = {};
-    this._events = new Map<string, EventHandler>();
+    this.#store = new Map();
   }
 
-  public setValue<T>(key: string, value: T) {
-    this._store[key] = value;
+  //PUBLIC METHODS
+
+  public get<T>(segmentName: string): Segment<T extends Object ? T : never> | undefined {
+    return this.#store.get(segmentName);
   }
 
-  public getValueByKey(key: keyof typeof this._store) {
-    return this._store[key];
+  public set<T>(segmentName: string, value: Segment<any>) {
+    this.#store.set(segmentName, value);
   }
 
-  public addEvent = (key: string, value: EventHandler) => {
-    this._events.set(key, value);
-  };
-
-  public removeEvent = (key: string) => {
-    this._events.delete(key);
-  };
-
-  public getEvent = (key: string) => this._events.get(key);
-
-  public getValue() {
-    return this._store;
+  public remove(segmentName: string) {
+    this.#store.delete(segmentName);
   }
 }
 
-const store = new Store();
+const smcStore = new SMCStore();
 
-export { store };
+export default smcStore;

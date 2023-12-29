@@ -1,19 +1,27 @@
 import React, { useEffect } from "react";
 import Comp1 from "./component1";
 import Comp2 from "./component2";
-import { testAction } from "./smcPortions";
+import useSegment from "../../hooks/useSegment";
 
 const Example1 = () => {
-  const handleTestAction = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    testAction({ test: Math.random(), test2: Math.random() });
+  const a = useSegment({ name: "test", defaultValue: { val1: "test1", val2: "test2" } });
+  const handleTestAction = () => {
+    a.update("val1", "updated_test");
   };
+
+  const segment = useSegment({ name: "test2" });
+
+  segment.watch("val2", (value) => {
+    console.log(value);
+  });
+
   return (
     <>
       <Comp1 />
       <br />
       <Comp2 />
       <br />
-      <button onClick={(e) => handleTestAction(e)}>Update State</button>
+      <button onClick={handleTestAction}>Main Component Update State</button>
     </>
   );
 };

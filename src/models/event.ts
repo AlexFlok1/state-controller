@@ -1,5 +1,4 @@
 import { EventT } from "../types/event";
-import { store } from "./store";
 
 class EventHandler {
   private _name: string;
@@ -17,7 +16,7 @@ class EventHandler {
     this._listner.dispatchEvent(this._event);
   }
 
-  public subscribe(method: (args: unknown) => void) {
+  public subscribe(method: (args: any) => any) {
     this._method = method;
     this._listner.addEventListener(this._name, method);
   }
