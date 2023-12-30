@@ -1,6 +1,13 @@
 import { EventHandler } from "./event";
 import smcStore from "./store";
 
+type SignleUpdate<T> = {
+  segmentKey: keyof T;
+  value: T[keyof T];
+};
+
+type UpdateProps<T> = SignleUpdate<T> | SignleUpdate<T>[];
+
 class Segment<T extends Object> {
   #name: string;
   #segmentValue: T;
@@ -19,6 +26,14 @@ class Segment<T extends Object> {
     smcStore.set<T>(this.#name, this);
   }
 
+  private isSingleSegmentUpdate<T>(args: UpdateProps<T>): args is SignleUpdate<T> {
+    return !Array.isArray(args);
+  }
+
+  private isArraySegmentUpdate<T>(args: UpdateProps<T>): args is SignleUpdate<T>[] {
+    return Array.isArray(args);
+  }
+
   //PUBLIC METHODS
 
   public get segmentValue() {
@@ -29,15 +44,31 @@ class Segment<T extends Object> {
     return this.#segmentValue[segmentKey];
   }
 
-  public update(segmentKey: keyof T, value: T[keyof T]) {
-    if (this.#segmentValue[segmentKey] !== value) {
-      this.#segmentValue[segmentKey] = value;
-      this.handleRecordToMainStore();
+  public update(args: UpdateProps<T>) {
+    if (this.isSingleSegmentUpdate(args)) {
+      if (this.#segmentValue[args.segmentKey] !== args.value) {
+        this.#segmentValue[args.segmentKey] = args.value;
+        this.handleRecordToMainStore();
 
-      const watcher = this.#watchers.get(`${this.#name}:${String(segmentKey)}`);
-      if (watcher) {
-        watcher.dispatch();
+        const watcher = this.#watchers.get(`${this.#name}:${String(args.segmentKey)}`);
+        if (watcher) {
+          watcher.dispatch();
+        }
       }
+    }
+
+    if (this.isArraySegmentUpdate(args)) {
+      for (const record of args) {
+        if (this.#segmentValue[record.segmentKey] !== record.value) {
+          this.#segmentValue[record.segmentKey] = record.value;
+
+          const watcher = this.#watchers.get(`${this.#name}:${String(record.segmentKey)}`);
+          if (watcher) {
+            watcher.dispatch();
+          }
+        }
+      }
+      this.handleRecordToMainStore();
     }
   }
 
@@ -51,7 +82,6 @@ class Segment<T extends Object> {
 
     let watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
     if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
-    console.log(this.#watchers);
     watcher.subscribe(() => {
       callback(this.get(segmentKey));
     });

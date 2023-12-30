@@ -6,12 +6,15 @@ import useSegment from "../../hooks/useSegment";
 const Example1 = () => {
   const a = useSegment({ name: "test", defaultValue: { val1: "test1", val2: "test2" } });
   const handleTestAction = () => {
-    a.update("val1", "updated_test");
+    a.update({ segmentKey: "val1", value: "updated_value" });
   };
 
-  const segment = useSegment({ name: "test2" });
+  const segment = useSegment<{ val1: string; val2: string }>({ name: "test2" });
 
   segment.watch("val2", (value) => {
+    console.log(value);
+  });
+  segment.watch("val1", (value) => {
     console.log(value);
   });
 

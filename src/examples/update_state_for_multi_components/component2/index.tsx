@@ -12,7 +12,10 @@ const Comp2 = () => {
   });
 
   const handleTestAction = () => {
-    b.update("val2", "updated_test");
+    b.update([
+      { segmentKey: "val1", value: "updated_value" },
+      { segmentKey: "val2", value: "update_value2" },
+    ]);
   };
 
   return (
