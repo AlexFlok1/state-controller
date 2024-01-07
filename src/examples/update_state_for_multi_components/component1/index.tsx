@@ -11,7 +11,7 @@ const Comp1 = () => {
   }, []);
 
   segment.watch("val1", (value) => {
-    setVal(value);
+    if (typeof value === "string") setVal(value);
   });
 
   return <>{val}</>;

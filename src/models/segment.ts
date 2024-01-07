@@ -77,14 +77,32 @@ class Segment<T extends Object> {
     this.handleRecordToMainStore();
   }
 
-  public watch(segmentKey: keyof T, callback: (value: T[keyof T]) => { value: T[keyof T] } | void) {
-    const watcherName = `${this.#name}:${String(segmentKey)}`;
+  public watch(
+    segmentKey: keyof T | (keyof T)[],
+    callback: (value: T[keyof T] | T[keyof T][]) => { value: T[keyof T] | { key: string; value: T[keyof T] }[] } | void
+  ) {
+    if (Array.isArray(segmentKey)) {
+      const result: any[] = [];
+      for (const key of segmentKey) {
+        console.log(key);
+        const watcherName = `${this.#name}:${String(key)}`;
+        const watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
+        if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
+        watcher.subscribe(() => {
+          console.log("Test");
+          result.push({ key, value: this.get(key) });
+          callback(result);
+        });
+      }
+    } else {
+      const watcherName = `${this.#name}:${String(segmentKey)}`;
 
-    let watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
-    if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
-    watcher.subscribe(() => {
-      callback(this.get(segmentKey));
-    });
+      const watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
+      if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
+      watcher.subscribe(() => {
+        callback(this.get(segmentKey));
+      });
+    }
   }
 }
 
