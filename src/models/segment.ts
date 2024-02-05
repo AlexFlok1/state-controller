@@ -34,6 +34,22 @@ class Segment<T extends Object> {
     return Array.isArray(args);
   }
 
+  private isWatcherExsistAlready(key: string): EventHandler | undefined {
+    return this.#watchers.get(key);
+  }
+
+  private handleNestedKeyValue(key: string) {
+    let nestedKeys = key.split(".");
+    let value: Record<string, any> = this.get(nestedKeys[0] as keyof T) as Record<string, any>;
+    if (nestedKeys.length === 1) return value;
+
+    for (let i = 1; i < nestedKeys.length; i++) {
+      value = value[nestedKeys[i] as string];
+    }
+
+    return value;
+  }
+
   //PUBLIC METHODS
 
   public get segmentValue() {
@@ -81,12 +97,13 @@ class Segment<T extends Object> {
     segmentKey: keyof T | (keyof T)[],
     callback: (value: T[keyof T] | T[keyof T][]) => { value: T[keyof T] | { key: string; value: T[keyof T] }[] } | void
   ) {
+    let watcher: EventHandler | undefined;
     if (Array.isArray(segmentKey)) {
       const result: any[] = [];
       for (const key of segmentKey) {
         console.log(key);
         const watcherName = `${this.#name}:${String(key)}`;
-        const watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
+        watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
         if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
         watcher.subscribe(() => {
           console.log("Test");
@@ -96,8 +113,7 @@ class Segment<T extends Object> {
       }
     } else {
       const watcherName = `${this.#name}:${String(segmentKey)}`;
-
-      const watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
+      watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
       if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
       watcher.subscribe(() => {
         callback(this.get(segmentKey));
