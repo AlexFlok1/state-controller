@@ -10,8 +10,11 @@ const Comp1 = () => {
     console.log("render");
   }, []);
 
-  segment.watch("val1", (value) => {
-    if (typeof value === "string") setVal(value);
+  segment.watch({
+    segmentKey: "val1",
+    callback: (val) => {
+      console.log(val);
+    },
   });
 
   return <>{val}</>;

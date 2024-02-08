@@ -6,6 +6,11 @@ type SignleUpdate<T> = {
   value: T[keyof T];
 };
 
+type WatchParams<T> = {
+  segmentKey: keyof T | (keyof T)[];
+  callback: (args: Record<keyof T, string>) => void;
+};
+
 type UpdateProps<T> = SignleUpdate<T> | SignleUpdate<T>[];
 
 class Segment<T extends Object> {
@@ -38,17 +43,7 @@ class Segment<T extends Object> {
     return this.#watchers.get(key);
   }
 
-  private handleNestedKeyValue(key: string) {
-    let nestedKeys = key.split(".");
-    let value: Record<string, any> = this.get(nestedKeys[0] as keyof T) as Record<string, any>;
-    if (nestedKeys.length === 1) return value;
-
-    for (let i = 1; i < nestedKeys.length; i++) {
-      value = value[nestedKeys[i] as string];
-    }
-
-    return value;
-  }
+  private handleNestedKeyValue(key: string) {}
 
   //PUBLIC METHODS
 
@@ -93,10 +88,7 @@ class Segment<T extends Object> {
     this.handleRecordToMainStore();
   }
 
-  public watch(
-    segmentKey: keyof T | (keyof T)[],
-    callback: (value: T[keyof T] | T[keyof T][]) => { value: T[keyof T] | { key: string; value: T[keyof T] }[] } | void
-  ) {
+  public watch({ segmentKey, callback }: WatchParams<T>) {
     let watcher: EventHandler | undefined;
     if (Array.isArray(segmentKey)) {
       const result: any[] = [];
@@ -106,9 +98,13 @@ class Segment<T extends Object> {
         watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
         if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
         watcher.subscribe(() => {
-          console.log("Test");
           result.push({ key, value: this.get(key) });
-          callback(result);
+          callback(
+            [...result].reduce((obj, el) => {
+              obj[el.key] = el.value;
+              return obj;
+            }, {})
+          );
         });
       }
     } else {
@@ -116,7 +112,7 @@ class Segment<T extends Object> {
       watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
       if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
       watcher.subscribe(() => {
-        callback(this.get(segmentKey));
+        callback({ [segmentKey]: this.get(segmentKey) } as unknown as Record<keyof T, string>);
       });
     }
   }

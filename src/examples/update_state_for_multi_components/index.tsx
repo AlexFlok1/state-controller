@@ -11,8 +11,11 @@ const Example1 = () => {
 
   const segment = useSegment<{ val1: string; val2: string }>({ name: "test2" });
 
-  segment.watch(["val1", "val2"], (value) => {
-    console.log(value);
+  segment.watch({
+    segmentKey: ["val1", "val2"],
+    callback: (val) => {
+      console.log(val);
+    },
   });
 
   return (

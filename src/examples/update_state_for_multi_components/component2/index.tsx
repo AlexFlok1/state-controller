@@ -7,8 +7,11 @@ const Comp2 = () => {
   console.log("render2");
   const segment = useSegment<{ val1: string; val2: string }>({ name: "test" });
   const b = useSegment({ name: "test2", defaultValue: { val1: "test1", val2: "test2" } });
-  segment.watch("val1", (value) => {
-    if (typeof value === "string") setVal(value);
+  segment.watch({
+    segmentKey: "val1",
+    callback: (val) => {
+      console.log(val);
+    },
   });
 
   const handleTestAction = () => {
