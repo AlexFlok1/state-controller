@@ -4,9 +4,12 @@ import Comp2 from "./component2";
 import useSegment from "../../hooks/useSegment";
 
 const Example1 = () => {
-  const a = useSegment({ name: "test", defaultValue: { val1: "test1", val2: "test2" } });
+  const a = useSegment({
+    name: "test",
+    defaultValue: { val1: "test1", val2: "test2", val3: { nestedVal: "nested value" } },
+  });
   const handleTestAction = () => {
-    a.update({ segmentKey: "val1", value: "updated_value" });
+    a.update({ segmentKey: "val3", value: { nestedVal: "test" } });
   };
 
   const segment = useSegment<{ val1: string; val2: string }>({ name: "test2" });

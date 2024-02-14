@@ -5,10 +5,10 @@ const Comp2 = () => {
   const [val, setVal] = useState("Hello");
 
   console.log("render2");
-  const segment = useSegment<{ val1: string; val2: string }>({ name: "test" });
+  const segment = useSegment<{ val1: string; val2: string; val3: { nestedVal: string } }>({ name: "test" });
   const b = useSegment({ name: "test2", defaultValue: { val1: "test1", val2: "test2" } });
   segment.watch({
-    segmentKey: "val1",
+    segmentKey: "val3.nestedVal",
     callback: (val) => {
       console.log(val);
     },

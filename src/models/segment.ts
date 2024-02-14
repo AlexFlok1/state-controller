@@ -2,16 +2,35 @@ import { EventHandler } from "./event";
 import smcStore from "./store";
 
 type SignleUpdate<T> = {
-  segmentKey: keyof T;
+  segmentKey: Paths<T>;
   value: T[keyof T];
 };
 
 type WatchParams<T> = {
-  segmentKey: keyof T | (keyof T)[];
-  callback: (args: Record<keyof T, string>) => void;
+  segmentKey: Paths<T> | Paths<T>[];
+  callback: (args: Record<keyof WatchParams<T>["segmentKey"], string>) => void;
+};
+
+type WatchParamsForSingleKey<T> = {
+  segmentKey: Paths<T>;
+  callback: (args: Record<keyof WatchParams<T>["segmentKey"], string>) => void;
 };
 
 type UpdateProps<T> = SignleUpdate<T> | SignleUpdate<T>[];
+
+/*
+TEST
+*/
+type NonSpecialFunctionProperty<T> = T extends Function ? Omit<T, "caller" | "arguments"> : T;
+type Paths<T> = T extends object
+  ? {
+      [K in keyof NonSpecialFunctionProperty<T>]: `${Exclude<K, symbol>}${
+        | ""
+        | `.${Paths<NonSpecialFunctionProperty<T>[K]>}`}`;
+    }[keyof NonSpecialFunctionProperty<T>]
+  : never;
+
+/**=========== */
 
 class Segment<T extends Object> {
   #name: string;
@@ -45,20 +64,41 @@ class Segment<T extends Object> {
 
   private handleNestedKeyValue(key: string) {}
 
+  private handleWatchForSingleKey({ segmentKey, callback }: WatchParamsForSingleKey<T>): void {
+    let watcher: EventHandler | undefined;
+    console.log(segmentKey);
+    const watcherName = `${this.#name}:${String(segmentKey)}`;
+    watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
+    if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
+    watcher.subscribe(() => {
+      callback({ [segmentKey]: this.get(segmentKey) } as unknown as Record<keyof WatchParams<T>["segmentKey"], string>);
+    });
+  }
+
   //PUBLIC METHODS
 
   public get segmentValue() {
     return this.#segmentValue;
   }
 
-  public get(segmentKey: keyof T) {
-    return this.#segmentValue[segmentKey];
+  public get(segmentKey: Paths<T>) {
+    if (segmentKey.includes(".")) {
+      const path = segmentKey.split(".");
+      let value: any = this.#segmentValue[path[0] as keyof T];
+      path.forEach((_, index) => {
+        value = value[path[index + 1]];
+      });
+      console.log(value);
+      return value;
+    }
+
+    return this.#segmentValue[segmentKey as keyof T];
   }
 
   public update(args: UpdateProps<T>) {
     if (this.isSingleSegmentUpdate(args)) {
-      if (this.#segmentValue[args.segmentKey] !== args.value) {
-        this.#segmentValue[args.segmentKey] = args.value;
+      if (this.#segmentValue["val1" as keyof T] !== args.value) {
+        this.#segmentValue["val1" as keyof T] = args.value;
         this.handleRecordToMainStore();
 
         const watcher = this.#watchers.get(`${this.#name}:${String(args.segmentKey)}`);
@@ -70,8 +110,8 @@ class Segment<T extends Object> {
 
     if (this.isArraySegmentUpdate(args)) {
       for (const record of args) {
-        if (this.#segmentValue[record.segmentKey] !== record.value) {
-          this.#segmentValue[record.segmentKey] = record.value;
+        if (this.#segmentValue["val1" as keyof T] !== record.value) {
+          this.#segmentValue["val1" as keyof T] = record.value;
 
           const watcher = this.#watchers.get(`${this.#name}:${String(record.segmentKey)}`);
           if (watcher) {
@@ -108,12 +148,7 @@ class Segment<T extends Object> {
         });
       }
     } else {
-      const watcherName = `${this.#name}:${String(segmentKey)}`;
-      watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
-      if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
-      watcher.subscribe(() => {
-        callback({ [segmentKey]: this.get(segmentKey) } as unknown as Record<keyof T, string>);
-      });
+      this.handleWatchForSingleKey({ segmentKey, callback });
     }
   }
 }
