@@ -6,10 +6,18 @@ import useSegment from "../../hooks/useSegment";
 const Example1 = () => {
   const a = useSegment({
     name: "test",
-    defaultValue: { val1: "test1", val2: "test2", val3: { nestedVal: "nested value" } },
+    defaultValue: {
+      val1: "test1",
+      val2: "test2",
+      val3: { nestedVal: "nested value", test: "cool1", secondNested: { val4: "test4" } },
+    },
   });
   const handleTestAction = () => {
-    a.update({ segmentKey: "val3", value: { nestedVal: "test" } });
+    a.update({
+      val3: { nestedVal: "cool1", test: "cool3" },
+      "val3.nestedVal": "cool2",
+      "val3.secondNested.val4": "cool3",
+    });
   };
 
   const segment = useSegment<{ val1: string; val2: string }>({ name: "test2" });

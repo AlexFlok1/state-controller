@@ -1,22 +1,12 @@
 import { EventHandler } from "./event";
 import smcStore from "./store";
 
-type SignleUpdate<T> = {
-  segmentKey: Paths<T>;
-  value: T[keyof T];
-};
+type UpdateProps<T> = Partial<Record<Extract<Paths<T>, string | number | symbol>, unknown>>;
 
 type WatchParams<T> = {
   segmentKey: Paths<T> | Paths<T>[];
-  callback: (args: Record<keyof WatchParams<T>["segmentKey"], string>) => void;
+  callback: (args: Record<string, string>) => void;
 };
-
-type WatchParamsForSingleKey<T> = {
-  segmentKey: Paths<T>;
-  callback: (args: Record<keyof WatchParams<T>["segmentKey"], string>) => void;
-};
-
-type UpdateProps<T> = SignleUpdate<T> | SignleUpdate<T>[];
 
 /*
 TEST
@@ -32,47 +22,64 @@ type Paths<T> = T extends object
 
 /**=========== */
 
-class Segment<T extends Object> {
+class Segment<T extends Record<string, unknown>> {
   #name: string;
-  #segmentValue: T;
+  #segmentValue: any;
   #watchers: Map<string, EventHandler>;
 
   constructor(name: string, defaultState: T) {
     this.#name = name;
-    this.#segmentValue = defaultState;
+    this.#segmentValue = this.flattenState(defaultState);
     this.#watchers = new Map();
     this.handleRecordToMainStore();
   }
 
   //PRIVATE METHODS
 
+  private flattenState(val: Record<string, unknown>, parent: string = ""): Record<string, unknown> {
+    return Object.keys(val).reduce<Record<string, unknown>>((newObj, key) => {
+      if (typeof val[key] === "object" && !Array.isArray(val[key])) {
+        return { ...newObj, ...this.flattenState(val[key] as Record<string, unknown>, key) };
+      }
+      newObj[`${parent ? `${parent}.` : ""}${key}`] = val[key];
+      return newObj;
+    }, {});
+  }
+
+  private convertNestedKeyToObject(key: string, value: string): Record<string, any> {
+    const keys = key.split(".");
+    let nestedObj: Record<string, any> = { [keys[keys.length - 1]]: value };
+    for (let i = keys.length - 2; i >= 0; i--) {
+      nestedObj = { [keys[i]]: nestedObj };
+    }
+    return nestedObj;
+  }
+
+  private deepMergeObjects(...objects: any[]) {
+    const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
+    return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
+  }
+
+  private stateToObject(val: Record<string, string>): Record<string, string> {
+    console.log(this.deepMergeObjects({ a: { b: 1 } }, { a: { c: 1 } }));
+    return Object.keys(val).reduce<Record<string, any>>((newObj, key) => {
+      const nestedKeys = key.split(".");
+      if (nestedKeys.length > 1) {
+        newObj = Object.assign({}, newObj, this.convertNestedKeyToObject(key, val[key]));
+        console.log(newObj);
+      } else {
+        newObj[key] = val[key];
+      }
+      return newObj;
+    }, {});
+  }
+
   private handleRecordToMainStore() {
     smcStore.set<T>(this.#name, this);
   }
 
-  private isSingleSegmentUpdate<T>(args: UpdateProps<T>): args is SignleUpdate<T> {
-    return !Array.isArray(args);
-  }
-
-  private isArraySegmentUpdate<T>(args: UpdateProps<T>): args is SignleUpdate<T>[] {
-    return Array.isArray(args);
-  }
-
   private isWatcherExsistAlready(key: string): EventHandler | undefined {
     return this.#watchers.get(key);
-  }
-
-  private handleNestedKeyValue(key: string) {}
-
-  private handleWatchForSingleKey({ segmentKey, callback }: WatchParamsForSingleKey<T>): void {
-    let watcher: EventHandler | undefined;
-    console.log(segmentKey);
-    const watcherName = `${this.#name}:${String(segmentKey)}`;
-    watcher = this.#watchers.get(watcherName) || new EventHandler({ name: watcherName });
-    if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
-    watcher.subscribe(() => {
-      callback({ [segmentKey]: this.get(segmentKey) } as unknown as Record<keyof WatchParams<T>["segmentKey"], string>);
-    });
   }
 
   //PUBLIC METHODS
@@ -82,45 +89,21 @@ class Segment<T extends Object> {
   }
 
   public get(segmentKey: Paths<T>) {
-    if (segmentKey.includes(".")) {
-      const path = segmentKey.split(".");
-      let value: any = this.#segmentValue[path[0] as keyof T];
-      path.forEach((_, index) => {
-        value = value[path[index + 1]];
-      });
-      console.log(value);
-      return value;
-    }
-
-    return this.#segmentValue[segmentKey as keyof T];
+    return this.#segmentValue[segmentKey];
   }
 
-  public update(args: UpdateProps<T>) {
-    if (this.isSingleSegmentUpdate(args)) {
-      if (this.#segmentValue["val1" as keyof T] !== args.value) {
-        this.#segmentValue["val1" as keyof T] = args.value;
-        this.handleRecordToMainStore();
-
-        const watcher = this.#watchers.get(`${this.#name}:${String(args.segmentKey)}`);
+  public update(updateObj: UpdateProps<T>) {
+    const flattenedObject = this.flattenState(updateObj);
+    Object.keys(flattenedObject).forEach((key) => {
+      if (this.#segmentValue[key] !== flattenedObject[key]) {
+        this.#segmentValue[key] = flattenedObject[key];
+        const watcher = this.#watchers.get(`${this.#name}:${String(key)}`);
         if (watcher) {
           watcher.dispatch();
         }
       }
-    }
-
-    if (this.isArraySegmentUpdate(args)) {
-      for (const record of args) {
-        if (this.#segmentValue["val1" as keyof T] !== record.value) {
-          this.#segmentValue["val1" as keyof T] = record.value;
-
-          const watcher = this.#watchers.get(`${this.#name}:${String(record.segmentKey)}`);
-          if (watcher) {
-            watcher.dispatch();
-          }
-        }
-      }
       this.handleRecordToMainStore();
-    }
+    });
   }
 
   public delete(segmentKey: keyof T) {
@@ -129,26 +112,17 @@ class Segment<T extends Object> {
   }
 
   public watch({ segmentKey, callback }: WatchParams<T>) {
+    const keys = Array.isArray(segmentKey) ? [...segmentKey] : [segmentKey];
     let watcher: EventHandler | undefined;
-    if (Array.isArray(segmentKey)) {
-      const result: any[] = [];
-      for (const key of segmentKey) {
-        console.log(key);
-        const watcherName = `${this.#name}:${String(key)}`;
-        watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
-        if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
-        watcher.subscribe(() => {
-          result.push({ key, value: this.get(key) });
-          callback(
-            [...result].reduce((obj, el) => {
-              obj[el.key] = el.value;
-              return obj;
-            }, {})
-          );
-        });
-      }
-    } else {
-      this.handleWatchForSingleKey({ segmentKey, callback });
+    let result: Record<string, any> = {};
+    for (const key of keys) {
+      const watcherName = `${this.#name}:${String(key)}`;
+      watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
+      if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
+      watcher.subscribe(() => {
+        result = { ...result, [key]: this.get(key as Paths<T>) };
+        callback(this.stateToObject(result as Record<string, string>));
+      });
     }
   }
 }
