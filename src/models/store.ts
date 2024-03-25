@@ -10,7 +10,7 @@ class SMCStore {
 
   //PUBLIC METHODS
 
-  public get<T>(segmentName: string): Segment<T extends Object ? T : never> | undefined {
+  public get<T>(segmentName: string): Segment<T extends Record<string, unknown> ? T : never> | undefined {
     return this.#store.get(segmentName);
   }
 

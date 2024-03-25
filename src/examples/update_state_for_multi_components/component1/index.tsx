@@ -2,19 +2,22 @@ import React, { useEffect, useState } from "react";
 import useSegment from "../../../hooks/useSegment";
 
 const Comp1 = () => {
-  const [val, setVal] = useState("Hello");
-
-  const segment = useSegment<{ val1: string; val2: string }>({ name: "test" });
-
-  useEffect(() => {
-    console.log("render");
-  }, []);
-
-  segment.watch("val1", (value) => {
-    if (typeof value === "string") setVal(value);
+  const segment = useSegment<any>({ name: "test" });
+  const [val, setVal] = useState<Record<string, any>>({
+    val1: segment.get("val1"),
+    val2: segment.get("val2"),
+    val3: segment.get("val3"),
   });
 
-  return <>{val}</>;
+  segment.watch({
+    segmentKey: ["val1", "val2", "val3.nestedVal"],
+    callback: (args) => {
+      console.log(args);
+      setVal(args);
+    },
+  });
+
+  return <div>Test Segment{JSON.stringify(val)}</div>;
 };
 
 export default Comp1;
