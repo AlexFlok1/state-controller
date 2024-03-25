@@ -15,8 +15,8 @@ const Example1 = () => {
   const handleTestAction = () => {
     a.update({
       val3: { nestedVal: "cool1", test: "cool3" },
-      "val3.nestedVal": "cool2",
-      "val3.secondNested.val4": "cool3",
+      "val3.nestedVal": "test5",
+      val2: "test5",
     });
   };
 
@@ -35,7 +35,12 @@ const Example1 = () => {
       <br />
       <Comp2 />
       <br />
-      <button onClick={handleTestAction}>Main Component Update State</button>
+      <button
+        style={{ width: "250px", padding: "8px", background: "green", marginTop: "5px" }}
+        onClick={handleTestAction}
+      >
+        Main Component Update State
+      </button>
     </>
   );
 };

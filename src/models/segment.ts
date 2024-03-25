@@ -56,22 +56,36 @@ class Segment<T extends Record<string, unknown>> {
   }
 
   private deepMergeObjects(...objects: any[]) {
-    const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
-    return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
+    let mergedObject: any = {};
+
+    for (let key in objects[0]) {
+      const nestedMerge = this.deepMergeObjects(
+        ...objects.filter((el) => typeof el[key] === "object").map((el) => el[key])
+      );
+      if (Object.keys(nestedMerge).length > 0) {
+        mergedObject[key] = nestedMerge;
+      }
+    }
+    mergedObject = {
+      ...objects.reduce((newObj, current) => {
+        return { ...newObj, ...current };
+      }, {}),
+      ...mergedObject,
+    };
+
+    return mergedObject;
   }
 
   private stateToObject(val: Record<string, string>): Record<string, string> {
-    console.log(this.deepMergeObjects({ a: { b: 1 } }, { a: { c: 1 } }));
-    return Object.keys(val).reduce<Record<string, any>>((newObj, key) => {
+    const res = Object.keys(val).map((key) => {
       const nestedKeys = key.split(".");
       if (nestedKeys.length > 1) {
-        newObj = Object.assign({}, newObj, this.convertNestedKeyToObject(key, val[key]));
-        console.log(newObj);
+        return this.convertNestedKeyToObject(key, val[key]);
       } else {
-        newObj[key] = val[key];
+        return { [key]: val[key] };
       }
-      return newObj;
-    }, {});
+    });
+    return this.deepMergeObjects(...res) ?? {};
   }
 
   private handleRecordToMainStore() {
@@ -112,9 +126,21 @@ class Segment<T extends Record<string, unknown>> {
   }
 
   public watch({ segmentKey, callback }: WatchParams<T>) {
-    const keys = Array.isArray(segmentKey) ? [...segmentKey] : [segmentKey];
+    let keys = Array.isArray(segmentKey) ? [...segmentKey] : [segmentKey];
     let watcher: EventHandler | undefined;
     let result: Record<string, any> = {};
+
+    for (const [index, key] of keys.entries()) {
+      const moreKeys = Object.keys(this.#segmentValue).filter((nKey) => {
+        const regExp = new RegExp(`^${key}\\.\\w+`);
+        return regExp.test(nKey);
+      });
+      if (moreKeys.length > 0) {
+        keys.splice(index, 1);
+        keys = [...keys, ...moreKeys] as Paths<T>[];
+      }
+    }
+
     for (const key of keys) {
       const watcherName = `${this.#name}:${String(key)}`;
       watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });

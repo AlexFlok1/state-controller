@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import useSegment from "../../../hooks/useSegment";
 
 const Comp2 = () => {
-  const [val, setVal] = useState("Hello");
+  const [val, setVal] = useState<Record<string, any>>({});
 
-  console.log("render2");
   const segment = useSegment<{
     val1: string;
     val2: string;
@@ -12,9 +11,9 @@ const Comp2 = () => {
   }>({ name: "test" });
   const b = useSegment({ name: "test2", defaultValue: { val1: "test1", val2: "test2" } });
   segment.watch({
-    segmentKey: ["val3.nestedVal", "val3.test", "val3.secondNested.val4"],
+    segmentKey: ["val3", "val2"],
     callback: (val) => {
-      console.log(val);
+      setVal(val);
     },
   });
 
@@ -24,8 +23,10 @@ const Comp2 = () => {
 
   return (
     <>
-      {val}
-      <button onClick={handleTestAction}> Component2 Update State</button>
+      <div>Test Segment{JSON.stringify(val)}</div>
+      <button style={{ width: "200px", padding: "8px", background: "green" }} onClick={handleTestAction}>
+        Component2 Update State
+      </button>
     </>
   );
 };
