@@ -14,8 +14,8 @@ const Example1 = () => {
   });
   const handleTestAction = () => {
     a.update({
-      val3: { nestedVal: "cool1", test: "cool3" },
       "val3.nestedVal": "test5",
+      "val3.secondNested.val4": "test6",
       val2: "test5",
     });
   };
