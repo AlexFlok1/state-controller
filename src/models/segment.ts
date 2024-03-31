@@ -8,9 +8,6 @@ type WatchParams<T> = {
   callback: (args: Record<string, string>) => void;
 };
 
-/*
-TEST
-*/
 type NonSpecialFunctionProperty<T> = T extends Function ? Omit<T, "caller" | "arguments"> : T;
 type Paths<T> = T extends object
   ? {
@@ -36,10 +33,15 @@ class Segment<T extends Record<string, unknown>> {
 
   //PRIVATE METHODS
 
+  //TODO: this method has a bug when nested more then once
   private flattenState(val: Record<string, unknown>, parent: string = ""): Record<string, unknown> {
     return Object.keys(val).reduce<Record<string, unknown>>((newObj, key) => {
       if (typeof val[key] === "object" && !Array.isArray(val[key])) {
-        return { ...newObj, ...this.flattenState(val[key] as Record<string, unknown>, key) };
+        console.log({ val, parent });
+        return {
+          ...newObj,
+          ...this.flattenState(val[key] as Record<string, unknown>, `${parent ? `${parent}.${key}` : `${key}`}`),
+        };
       }
       newObj[`${parent ? `${parent}.` : ""}${key}`] = val[key];
       return newObj;
@@ -138,6 +140,7 @@ class Segment<T extends Record<string, unknown>> {
       if (moreKeys.length > 0) {
         keys.splice(index, 1);
         keys = [...keys, ...moreKeys] as Paths<T>[];
+        console.log(keys);
       }
     }
 
