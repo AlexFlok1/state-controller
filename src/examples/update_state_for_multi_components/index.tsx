@@ -6,7 +6,7 @@ import Comp2 from "./component2";
 import useSegment from "../../hooks/useSegment";
 
 const Example1 = (): JSX.Element => {
-  const a = useSegment({
+  const segment1 = useSegment({
     name: "Segment1",
     defaultValue: {
       val1: "test1",
@@ -15,16 +15,16 @@ const Example1 = (): JSX.Element => {
     },
   });
   const handleTestAction = () => {
-    a.update({
+    segment1.update({
       "val3.nestedVal": "test5",
       "val3.secondNested.val4": "test6",
       val2: "test5",
     });
   };
 
-  const segment = useSegment<{ val1: string; val2: string }>({ name: "test2" });
+  const segment2 = useSegment<{ val1: string; val2: string }>({ name: "Segment2" });
 
-  segment.watch({
+  segment2.watch({
     segmentKey: ["val1", "val2"],
     callback: (val) => {
       console.log(val);

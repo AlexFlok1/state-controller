@@ -25,6 +25,7 @@ class Segment<T extends Record<string, unknown>> {
   #watchers: Map<string, EventHandler>;
 
   constructor(name: string, defaultState: T) {
+    console.log({ name, defaultState });
     this.#name = name;
     this.#segmentValue = this.flattenState(defaultState);
     this.#watchers = new Map();

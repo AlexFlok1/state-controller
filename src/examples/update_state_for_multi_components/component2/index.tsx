@@ -5,13 +5,13 @@ import { Button, Typography } from "@mui/material";
 const Comp2 = () => {
   const [val, setVal] = useState<Record<string, any>>({});
 
-  const segment = useSegment<{
+  const segment1 = useSegment<{
     val1: string;
     val2: string;
     val3: { nestedVal: string; test: string; secondNested: Record<string, any> };
   }>({ name: "Segment1" });
-  const b = useSegment({ name: "Segment2", defaultValue: { val1: "test1", val2: "test2" } });
-  segment.watch({
+  const segment2 = useSegment({ name: "Segment2", defaultValue: { val1: "test1", val2: "test2" } });
+  segment1.watch({
     segmentKey: ["val3", "val2"],
     callback: (val) => {
       setVal(val);
@@ -19,7 +19,7 @@ const Comp2 = () => {
   });
 
   const handleTestAction = () => {
-    b.update({ val1: "test 3", val2: "test4" });
+    segment2.update({ val1: "test 3", val2: "test4" });
   };
 
   return (

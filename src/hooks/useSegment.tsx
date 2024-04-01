@@ -7,6 +7,7 @@ type SegementHookProps<T extends Record<string, unknown>> = {
 };
 
 export default function useSegment<T extends Record<string, unknown>>(props: SegementHookProps<T>) {
+  console.log(props);
   const existingSegment = smcStore.get<T>(props.name);
 
   if (existingSegment) return existingSegment;

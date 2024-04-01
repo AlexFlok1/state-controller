@@ -9,9 +9,12 @@ const Comp1 = () => {
     val2: segment.get("val2"),
   });
 
+  console.log(segment.get("val1"));
+
   segment.watch({
     segmentKey: ["val1", "val2"],
     callback: (args) => {
+      console.log(args);
       setVal(args);
     },
   });
