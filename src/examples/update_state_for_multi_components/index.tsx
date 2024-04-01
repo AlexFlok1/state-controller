@@ -1,11 +1,13 @@
-import React, { useEffect } from "react";
+//MUI
+import { Button, Grid } from "@mui/material";
+
 import Comp1 from "./component1";
 import Comp2 from "./component2";
 import useSegment from "../../hooks/useSegment";
 
-const Example1 = () => {
+const Example1 = (): JSX.Element => {
   const a = useSegment({
-    name: "test",
+    name: "Segment1",
     defaultValue: {
       val1: "test1",
       val2: "test2",
@@ -30,18 +32,19 @@ const Example1 = () => {
   });
 
   return (
-    <>
-      <Comp1 />
-      <br />
-      <Comp2 />
-      <br />
-      <button
-        style={{ width: "250px", padding: "8px", background: "green", marginTop: "5px" }}
-        onClick={handleTestAction}
-      >
-        Main Component Update State
-      </button>
-    </>
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Comp1 />
+      </Grid>
+      <Grid item xs={12}>
+        <Comp2 />
+      </Grid>
+      <Grid item xs={12}>
+        <Button variant="contained" style={{ width: "250px" }} onClick={handleTestAction}>
+          Update Segment1
+        </Button>
+      </Grid>
+    </Grid>
   );
 };
 

@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import Segment from "../models/segment";
 import smcStore from "../models/store";
 
