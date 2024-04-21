@@ -25,7 +25,6 @@ class Segment<T extends Record<string, unknown>> {
   #watchers: Map<string, EventHandler>;
 
   constructor(name: string, defaultState: T) {
-    console.log({ name, defaultState });
     this.#name = name;
     this.#segmentValue = this.flattenState(defaultState);
     this.#watchers = new Map();
@@ -38,7 +37,6 @@ class Segment<T extends Record<string, unknown>> {
   private flattenState(val: Record<string, unknown>, parent: string = ""): Record<string, unknown> {
     return Object.keys(val).reduce<Record<string, unknown>>((newObj, key) => {
       if (typeof val[key] === "object" && !Array.isArray(val[key])) {
-        console.log({ val, parent });
         return {
           ...newObj,
           ...this.flattenState(val[key] as Record<string, unknown>, `${parent ? `${parent}.${key}` : `${key}`}`),
@@ -129,6 +127,7 @@ class Segment<T extends Record<string, unknown>> {
   }
 
   public watch({ segmentKey, callback }: WatchParams<T>) {
+    console.log(segmentKey);
     let keys = Array.isArray(segmentKey) ? [...segmentKey] : [segmentKey];
     let watcher: EventHandler | undefined;
     let result: Record<string, any> = {};

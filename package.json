@@ -5,7 +5,8 @@
   "main": "src/main.tsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "vite --port 3000"
+    "start": "vite --port 3000",
+    "build": "vite build"
   },
   "keywords": [
     "global",

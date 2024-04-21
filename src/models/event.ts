@@ -16,7 +16,7 @@ class EventHandler {
     this._listner.dispatchEvent(this._event);
   }
 
-  public subscribe(method: (args: any) => any) {
+  public subscribe(method: (args: unknown) => void) {
     this._method = method;
     this._listner.addEventListener(this._name, method);
   }
