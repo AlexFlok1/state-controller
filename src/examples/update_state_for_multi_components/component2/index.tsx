@@ -2,19 +2,21 @@ import { useState } from "react";
 import useSegment from "../../../hooks/useSegment";
 import { Button, Typography } from "@mui/material";
 
+type Segment1 = {
+  val1: string;
+  val2: string;
+  val3: { nestedVal: string; test: string; secondNested: Record<string, any> };
+};
+
 const Comp2 = () => {
   const [val, setVal] = useState<Record<string, any>>();
+  const defaultForSegment2 = { name: "Segment2", defaultValue: { val1: "test1", val2: "test2" } };
 
-  const segment1 = useSegment<{
-    val1: string;
-    val2: string;
-    val3: { nestedVal: string; test: string; secondNested: Record<string, any> };
-  }>({ name: "Segment1" });
-  const segment2 = useSegment({ name: "Segment2", defaultValue: { val1: "test1", val2: "test2" } });
+  const segment1 = useSegment<Segment1>({ name: "Segment1" });
+  const segment2 = useSegment(defaultForSegment2);
   segment1?.watch({
     segmentKey: ["val3", "val2"],
     callback: (val) => {
-      console.log(val);
       setVal(val);
     },
   });
