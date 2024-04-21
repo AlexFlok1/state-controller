@@ -1,5 +1,5 @@
 /* SMC 2023 */
-import Segment from "./segment";
+import type Segment from "./segment";
 
 class SMCStore {
   #store: Map<string, Segment<any>>;
@@ -14,7 +14,7 @@ class SMCStore {
     return this.#store.get(segmentName);
   }
 
-  public set<T>(segmentName: string, value: Segment<any>) {
+  public set<T>(segmentName: string, value: Segment<T extends {} ? T : never>) {
     this.#store.set(segmentName, value);
   }
 

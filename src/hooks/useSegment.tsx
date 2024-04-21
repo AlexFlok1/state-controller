@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Segment from "../models/segment";
 import smcStore from "../models/store";
 
@@ -6,11 +7,26 @@ type SegementHookProps<T extends Record<string, unknown>> = {
   defaultValue?: T;
 };
 
+type MaybeSegment<T> = Segment<T extends Record<string, unknown> ? T : never> | undefined;
+
 export default function useSegment<T extends Record<string, unknown>>(props: SegementHookProps<T>) {
-  console.log(props);
-  const existingSegment = smcStore.get<T>(props.name);
+  const [segment, setSegment] = useState<MaybeSegment<T>>(undefined);
 
-  if (existingSegment) return existingSegment;
+  useEffect(() => {
+    let storedSegment = smcStore.get<T>(props.name);
 
-  return new Segment<T>(props.name, props.defaultValue || ({} as T));
+    if (storedSegment && props.defaultValue && Object.keys(storedSegment.segmentValue).length === 0) {
+      storedSegment.update(props.defaultValue);
+    }
+
+    if (!storedSegment) {
+      storedSegment = new Segment<T>(props.name, props.defaultValue || ({} as T));
+      smcStore.set(props.name, storedSegment);
+    }
+
+    setSegment(storedSegment);
+  }, [props.name, props.defaultValue]);
+
+  console.log(segment);
+  return segment;
 }
