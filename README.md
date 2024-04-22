@@ -1,6 +1,11 @@
-# SMC Instruction
+# SMC
 
-## Example 1
+## Why SMC?
+
+No more worries about seting up redux or any other complicated, heavy package.
+With SMC you only need `useSegment` hook or `new Segment()` and that's it!
+
+## Example with useSegment
 
 1. **Initiate Segment in Component1**
 
