@@ -1,6 +1,6 @@
-#SMC Instruction
+# SMC Instruction
 
-##Example 1
+## Example 1
 
 1. **Initiate Segment in Component1**
 
