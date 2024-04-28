@@ -14,8 +14,9 @@ const Comp2 = () => {
 
   const segment1 = useSegment<Segment1>({ name: "Segment1" });
   const segment2 = useSegment(defaultForSegment2);
+
   segment1?.watch({
-    segmentKey: ["val3", "val2"],
+    segmentKey: ["val3.nestedVal", "val2"],
     callback: (val) => {
       setVal(val);
     },

@@ -27,6 +27,5 @@ export default function useSegment<T extends Record<string, unknown>>(props: Seg
     setSegment(storedSegment);
   }, [props.name, props.defaultValue]);
 
-  console.log(segment);
   return segment;
 }

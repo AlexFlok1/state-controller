@@ -1,23 +1,14 @@
 import { EventHandler } from "./event";
 import smcStore from "./store";
 
+import type { Paths } from "../utilities/types";
+
 type UpdateProps<T> = Partial<Record<Extract<Paths<T>, string | number | symbol>, unknown>>;
 
 type WatchParams<T> = {
   segmentKey: Paths<T> | Paths<T>[];
   callback: (args: Record<string, string>) => void;
 };
-
-type NonSpecialFunctionProperty<T> = T extends Function ? Omit<T, "caller" | "arguments"> : T;
-type Paths<T> = T extends object
-  ? {
-      [K in keyof NonSpecialFunctionProperty<T>]: `${Exclude<K, symbol>}${
-        | ""
-        | `.${Paths<NonSpecialFunctionProperty<T>[K]>}`}`;
-    }[keyof NonSpecialFunctionProperty<T>]
-  : never;
-
-/**=========== */
 
 class Segment<T extends Record<string, unknown>> {
   #name: string;
@@ -33,7 +24,6 @@ class Segment<T extends Record<string, unknown>> {
 
   //PRIVATE METHODS
 
-  //TODO: this method has a bug when nested more then once
   private flattenState(val: Record<string, unknown>, parent: string = ""): Record<string, unknown> {
     return Object.keys(val).reduce<Record<string, unknown>>((newObj, key) => {
       if (typeof val[key] === "object" && !Array.isArray(val[key])) {
@@ -60,9 +50,7 @@ class Segment<T extends Record<string, unknown>> {
     let mergedObject: any = {};
 
     for (let key in objects[0]) {
-      const nestedMerge = this.deepMergeObjects(
-        ...objects.filter((el) => typeof el[key] === "object").map((el) => el[key])
-      );
+      const nestedMerge = this.deepMergeObjects(...objects.filter((el) => typeof el[key] === "object").map((el) => el[key]));
       if (Object.keys(nestedMerge).length > 0) {
         mergedObject[key] = nestedMerge;
       }
@@ -99,6 +87,7 @@ class Segment<T extends Record<string, unknown>> {
 
   //PUBLIC METHODS
 
+  //TODO: add ability to support set of keys
   public get segmentValue() {
     return this.#segmentValue;
   }

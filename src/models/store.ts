@@ -2,7 +2,7 @@
 import type Segment from "./segment";
 
 class SMCStore {
-  #store: Map<string, Segment<any>>;
+  #store: Map<string, Segment<Record<string, unknown>>>;
 
   constructor() {
     this.#store = new Map();
