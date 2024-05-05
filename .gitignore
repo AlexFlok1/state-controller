@@ -1,6 +1,6 @@
 # dependencies
 node_modules
-build
+dist
 public
 main.tsx
 App.tsx

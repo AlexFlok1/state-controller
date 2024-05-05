@@ -1,6 +1,6 @@
 {
-  "name": "smc",
-  "version": "0.0.1",
+  "name": "easy-state-management",
+  "version": "0.0.2",
   "description": "this is a state management control system to help you forget about redux complexity",
   "main": "src/main.tsx",
   "scripts": {
@@ -10,7 +10,9 @@
   },
   "keywords": [
     "global",
-    "state"
+    "state",
+    "light",
+    "easy"
   ],
   "author": "Alex Flok",
   "license": "ISC",
@@ -40,5 +42,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
