@@ -6,7 +6,7 @@ import type { Paths } from "../utilities/types";
 type UpdateProps<T> = Partial<Record<Extract<Paths<T>, string | number | symbol>, unknown>>;
 
 type WatchParams<T> = {
-  segmentKey: Paths<T> | Paths<T>[];
+  segmentKey: Paths<T>[];
   callback: (args: Record<string, string>) => void;
 };
 
@@ -85,11 +85,38 @@ class Segment<T extends Record<string, unknown>> {
     return this.#watchers.get(key);
   }
 
+  private handleSegmentKeys(keys: Paths<T>[]): Paths<T>[] {
+    let result = keys;
+    for (const [index, key] of result.entries()) {
+      const moreKeys = Object.keys(this.#segmentValue).filter((nKey) => {
+        const regExp = new RegExp(`^${key}\\.\\w+`);
+        return regExp.test(nKey);
+      });
+      if (moreKeys.length > 0) {
+        result.splice(index, 1);
+        result = [...result, ...moreKeys] as Paths<T>[];
+      }
+    }
+
+    return result;
+  }
+
   //PUBLIC METHODS
 
   //TODO: add ability to support set of keys
-  public get segmentValue() {
-    return this.#segmentValue;
+
+  public getValues(segmentKeys: Paths<T>[] = []) {
+    if (segmentKeys.length === 0) {
+      return this.stateToObject(this.#segmentValue);
+    }
+
+    return this.stateToObject(
+      this.handleSegmentKeys(segmentKeys)
+        .map((key) => ({ [key]: this.#segmentValue[key] }))
+        .reduce((newObj, el) => {
+          return { ...newObj, ...el };
+        }, {})
+    );
   }
 
   public get(segmentKey: Paths<T>) {
@@ -116,29 +143,16 @@ class Segment<T extends Record<string, unknown>> {
   }
 
   public watch({ segmentKey, callback }: WatchParams<T>) {
-    console.log(segmentKey);
-    let keys = Array.isArray(segmentKey) ? [...segmentKey] : [segmentKey];
+    const keys = this.handleSegmentKeys(segmentKey);
     let watcher: EventHandler | undefined;
     let result: Record<string, any> = {};
-
-    for (const [index, key] of keys.entries()) {
-      const moreKeys = Object.keys(this.#segmentValue).filter((nKey) => {
-        const regExp = new RegExp(`^${key}\\.\\w+`);
-        return regExp.test(nKey);
-      });
-      if (moreKeys.length > 0) {
-        keys.splice(index, 1);
-        keys = [...keys, ...moreKeys] as Paths<T>[];
-        console.log(keys);
-      }
-    }
 
     for (const key of keys) {
       const watcherName = `${this.#name}:${String(key)}`;
       watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
       if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
       watcher.subscribe(() => {
-        result = { ...result, [key]: this.get(key as Paths<T>) };
+        result = { ...result, [key]: this.get(key) };
         callback(this.stateToObject(result as Record<string, string>));
       });
     }

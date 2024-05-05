@@ -15,7 +15,7 @@ const Comp1 = () => {
 
   return (
     <Typography variant="body2">
-      Trak Segment 2 data in component 1 <code>{JSON.stringify(val ?? segment?.segmentValue)}</code>
+      Trak Segment 2 data in component 1 <code>{JSON.stringify(val ?? segment?.getValues())}</code>
     </Typography>
   );
 };

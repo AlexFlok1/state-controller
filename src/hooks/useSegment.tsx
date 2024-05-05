@@ -15,13 +15,13 @@ export default function useSegment<T extends Record<string, unknown>>(props: Seg
   useEffect(() => {
     let storedSegment = smcStore.get<T>(props.name);
 
-    if (storedSegment && props.defaultValue && Object.keys(storedSegment.segmentValue).length === 0) {
+    if (storedSegment && props.defaultValue && Object.keys(storedSegment.getValues()).length === 0) {
       storedSegment.update(props.defaultValue);
     }
 
     if (!storedSegment) {
       storedSegment = new Segment<T>(props.name, props.defaultValue || ({} as T));
-      smcStore.set(props.name, storedSegment);
+      if (storedSegment) smcStore.set(props.name, storedSegment as any);
     }
 
     setSegment(storedSegment);
