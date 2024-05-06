@@ -14,6 +14,10 @@
     "light",
     "easy"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AlexFlok1/state-controller"
+  },
   "author": "Alex Flok",
   "license": "ISC",
   "devDependencies": {
