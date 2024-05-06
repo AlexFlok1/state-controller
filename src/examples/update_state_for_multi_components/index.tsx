@@ -1,9 +1,10 @@
-//MUI
+import React from "react";
 import { Button, Grid } from "@mui/material";
 
 import Comp1 from "./component1";
 import Comp2 from "./component2";
-import useSegment from "../../hooks/useSegment";
+import { useSegment } from "state-watch/dist";
+//import useSegment from "../../hooks/useSegment";
 
 type Segment2 = { val1: string; val2: string };
 
