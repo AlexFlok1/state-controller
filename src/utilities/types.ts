@@ -1,3 +1,5 @@
+import type Segment from "../models/segment";
+
 type Paths<T> = T extends object
   ? {
       [K in keyof T]: `${Exclude<K, symbol>}${"" | `.${Paths<T[K]>}`}`;
