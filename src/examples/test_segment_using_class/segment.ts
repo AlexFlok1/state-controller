@@ -1,5 +1,5 @@
-import Segment from "../models/segment";
-import { Paths } from "../utilities/types";
+import Segment from "../../models/segment";
+import { Paths } from "../../utilities/types";
 
 //init schema fro the segment
 
