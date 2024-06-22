@@ -71,6 +71,6 @@ With SMC you only need `useSegment` hook or `new Segment()` and that's it!
 
 ```
 
-## Coming soons
+## Coming soon
 
 1. **Ability to safe all state or partail to the session/local storage**
