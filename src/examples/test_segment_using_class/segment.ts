@@ -1,4 +1,5 @@
-import Segment from "../../models/segment";
+//import Segment from "../../models/segment";
+import Segment from "state-watch/dist/models/segment";
 import { Paths } from "../../utilities/types";
 
 //init schema fro the segment
