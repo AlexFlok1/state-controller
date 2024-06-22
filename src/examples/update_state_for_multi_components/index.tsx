@@ -3,8 +3,8 @@ import { Button, Grid } from "@mui/material";
 
 import Comp1 from "./component1";
 import Comp2 from "./component2";
-//import { useSegment } from "state-watch/dist";
 import useSegment from "../../hooks/useSegment";
+import Comp3 from "./component3";
 
 type Segment2 = { val1: string; val2: string };
 
@@ -43,6 +43,9 @@ const Example1 = (): JSX.Element => {
       </Grid>
       <Grid item xs={12}>
         <Comp2 />
+      </Grid>
+      <Grid item xs={12}>
+        <Comp3 />
       </Grid>
       <Grid item xs={12}>
         <Button variant="contained" style={{ width: "250px" }} onClick={handleTestAction}>

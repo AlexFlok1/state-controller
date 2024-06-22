@@ -1,7 +1,6 @@
 import React from "react";
 import { useState } from "react";
-//import useSegment from "../../../hooks/useSegment";
-import { useSegment } from "state-watch/dist";
+import useSegment from "../../../hooks/useSegment";
 import { Button, Typography } from "@mui/material";
 
 type Segment1 = {

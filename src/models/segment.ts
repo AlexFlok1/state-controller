@@ -146,7 +146,7 @@ class Segment<T extends Record<string, unknown>> {
     const keys = this.handleSegmentKeys(segmentKey);
     let watcher: EventHandler | undefined;
     let result: Record<string, any> = {};
-
+    console.log(keys);
     for (const key of keys) {
       const watcherName = `${this.#name}:${String(key)}`;
       watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
