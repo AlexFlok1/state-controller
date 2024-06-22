@@ -47,8 +47,12 @@ With SMC you only need `useSegment` hook or `new Segment()` and that's it!
   //Init Segment
   const testSegment = new Segment<Segment1>("test segment", { test1: "test1", test2: "test2" });
 
-  //init setter
-  //init generric getter
+  //get all values
+  function getAll() {
+    return testSegment.getValues();
+  }
+
+  //init generric setter
   function segment1Setter(key: Paths<Segment1>, value: Segment1[keyof Segment1]) {
     testSegment.update({ [key]: value });
   }
@@ -58,10 +62,13 @@ With SMC you only need `useSegment` hook or `new Segment()` and that's it!
     return testSegment.get(key);
   }
 
-  //init watcher
-  const watcher = testSegment.watch;
+  //init watcher for spesific value
+  function whatchFor(params: Parameters<typeof testSegment.watch>[0]) {
+    testSegment.watch(params);
+  }
 
-  export { segment1Setter, segment1Getter, watcher };
+  export { segment1Setter, segment1Getter, whatchFor, getAll };
+
 ```
 
 ## Coming soons
