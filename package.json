@@ -1,6 +1,6 @@
 {
   "name": "state-watch",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "this is a state management control system to help you forget about redux complexity",
   "main": "src/main.tsx",
   "scripts": {
