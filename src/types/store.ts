@@ -1,5 +1,5 @@
-type SetOptions = {
+type SegmentOptions = {
     saveTo?: "localStorage" | "session"
 }
 
-export type {SetOptions}
+export type {SegmentOptions}
