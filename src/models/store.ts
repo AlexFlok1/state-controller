@@ -15,7 +15,6 @@ class SMCStore {
   }
 
   public set<T>(segmentName: string, value: Segment<T extends Record<string, unknown> ? T : never>) {
-
     this.#store.set(segmentName, value);
   }
 

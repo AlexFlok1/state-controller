@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-//import useSegment from "../../../hooks/useSegment";
-import { useSegment } from "state-watch/dist";
+import useSegment from "../../../hooks/useSegment";
+//import { useSegment } from "state-watch/dist";
 import { Button, Typography } from "@mui/material";
 import { whatchFor, segment1Setter, getAll } from "../../test_segment_using_class/segment";
 
