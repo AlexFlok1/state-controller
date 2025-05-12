@@ -1,5 +1,5 @@
 type SegmentOptions = {
-    saveTo?: "localStorage" | "session"
+    saveTo?: "localStorage" | "sessionStorage"
 }
 
 export type {SegmentOptions}

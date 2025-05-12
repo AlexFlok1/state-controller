@@ -94,7 +94,7 @@ class Segment<T extends Record<string, unknown>> {
       this.#setToLocalStorage<T>(this.#name, this.#segmentValue)
     }
 
-    if(this.#options?.saveTo === "session"){
+    if(this.#options?.saveTo === "sessionStorage"){
       this.#setToSession<T>(this.#name, this.#segmentValue)
     }
 
@@ -143,6 +143,10 @@ class Segment<T extends Record<string, unknown>> {
     return this.#segmentValue[segmentKey];
   }
 
+  set options(options: SegmentOptions){
+    this.#options = options
+  } 
+
   public update(updateObj: UpdateProps<T>) {
     const flattenedObject = this.flattenState(updateObj);
     Object.keys(flattenedObject).forEach((key) => {
@@ -166,7 +170,6 @@ class Segment<T extends Record<string, unknown>> {
     const keys = this.handleSegmentKeys(segmentKey);
     let watcher: EventHandler | undefined;
     let result: Record<string, any> = {};
-    console.log(keys);
     for (const key of keys) {
       const watcherName = `${this.#name}:${String(key)}`;
       watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
