@@ -77,7 +77,8 @@ With SMC you only need `useSegment` hook or `new Segment()` and that's it!
 
    You can now optionally persist your segment state by passing a `saveTo` option when initializing a segment via `useSegment`.
 
-  ```const segment = useSegment({
+  ```ts 
+    const segment = useSegment({
      name: "Segment1",
      defaultValue: {
        val1: "value",
@@ -86,7 +87,7 @@ With SMC you only need `useSegment` hook or `new Segment()` and that's it!
      options: {
        saveTo: "localStorage", // or "sessionStorage"
      },
-   });
+    });
   ```
 
 ## Coming Soon 
