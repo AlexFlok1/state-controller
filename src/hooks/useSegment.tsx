@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Segment from "../models/segment";
 import smcStore from "../models/store";
 import { SegmentOptions } from "../types/store";
-import {getFromStorage, setToStorage, getSegmentStorage} from "../utilities/useStorage"
+import {TempStorage} from "../services/TempStorage"
 
 type InitSegmentHookProps<T extends Record<string, unknown>> = {
   name: string;
@@ -24,20 +24,15 @@ export default function useSegment<T extends Record<string, unknown>>(props: Seg
   const [segment, setSegment] = useState<MaybeSegment<T>>(undefined);
   
   function getSegmentDefaultState(): T | undefined {
-    const storage = props.options?.saveTo ? getSegmentStorage(props.options.saveTo) : null;
-  
-    if (storage) {
-      return getFromStorage(storage, props.name) ?? props.defaultValue;
+    if(props.options?.saveTo){
+      return TempStorage.instanceOf(props.options.saveTo).get(props.name) ?? props.defaultValue;
     }
-  
     return props.defaultValue;
   }
   
   function saveSegmentValue(value: T) {
-    const storage = props.options?.saveTo ? getSegmentStorage(props.options.saveTo) : null;
-  
-    if (storage) {
-      setToStorage(storage, props.name, value);
+    if(props.options?.saveTo){
+      TempStorage.instanceOf(props.options.saveTo).set(props.name, value);
     }
   }
 

@@ -6,18 +6,17 @@ import Comp2 from "./component2";
 import useSegment from "../../hooks/useSegment";
 //import { useSegment } from "state-watch/dist";
 import Comp3 from "./component3";
-import createSegment from "../../utilities/createSegment";
 
 type Segment2 = { val1: string; val2: string };
 
 const Example1 = (): JSX.Element => {
 
-  const segment1 = createSegment(
-    "Segment1", {
+  const segment1 = useSegment({
+    name:"Segment1", defaultValue:{
     val1: "test1",
     val2: "test2",
     val3: { nestedVal: "nested value", test: "cool1", secondNested: { val4: "test4" } },
-  }, {saveTo: "localStorage"});
+  }, options:{saveTo: "localStorage"}});
   const handleTestAction = () => {
     segment1?.update({
       "val3.nestedVal": "test5",
