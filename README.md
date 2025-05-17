@@ -9,7 +9,8 @@ With SMC you only need `useSegment` hook or `new Segment()` and that's it!
 
 1. **Initiate Segment in Component1**
 
-```const defaultForSegment1 = {
+```ts
+  const defaultForSegment1 = {
     name: "Segment1",
     defaultValue: {
       val1: "test1",
@@ -37,7 +38,8 @@ With SMC you only need `useSegment` hook or `new Segment()` and that's it!
 
 1. **Initiate Segment in .ts file**
 
-```//init schema fro the segment
+```ts 
+  //init schema fro the segment
 
   type Segment1 = {
     test1: string;
@@ -68,7 +70,6 @@ With SMC you only need `useSegment` hook or `new Segment()` and that's it!
   }
 
   export { segment1Setter, segment1Getter, whatchFor, getAll };
-
 ```
 
 ## Session and Local Storage
