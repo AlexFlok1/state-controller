@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
-//import useSegment from "../../../hooks/useSegment";
-import { useSegment } from "state-watch/dist";
+import useSegment from "../../../hooks/useSegment";
+//import { useSegment } from "state-watch/dist";
 import { Button, Typography } from "@mui/material";
 
 type Segment1 = {
@@ -12,10 +12,9 @@ type Segment1 = {
 
 const Comp2 = () => {
   const [val, setVal] = useState<Record<string, any>>();
-  const defaultForSegment2 = { name: "Segment2", defaultValue: { val1: "test1", val2: "test2" } };
 
-  const segment1 = useSegment<Segment1>({ name: "Segment1" });
-  const segment2 = useSegment(defaultForSegment2);
+  const segment1 = useSegment<Segment1>({ name: "Segment1"});
+  const segment2 = useSegment({name: "Segment2", defaultValue: { val1: "test1", val2: "test2" }, options: {saveTo: "localStorage"}})
 
   segment1?.watch({
     segmentKey: ["val3.nestedVal", "val2", "val3.secondNested.val4"],

@@ -1,11 +1,12 @@
 import React from "react";
 import { useState } from "react";
-//import useSegment from "../../../hooks/useSegment";
-import { useSegment } from "state-watch/dist";
+import useSegment from "../../../hooks/useSegment";
+//import { useSegment } from "state-watch/dist";
 import { Typography } from "@mui/material";
 
 const Comp1 = () => {
   const segment = useSegment<any>({ name: "Segment2" });
+  console.log({segment})
   const [val, setVal] = useState<Record<string, any>>();
   segment?.watch({
     segmentKey: ["val1", "val2"],

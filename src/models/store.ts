@@ -21,6 +21,7 @@ class SMCStore {
   public remove(segmentName: string) {
     this.#store.delete(segmentName);
   }
+
 }
 
 const smcStore = new SMCStore();

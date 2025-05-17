@@ -2,6 +2,7 @@ import { EventHandler } from "./event";
 import smcStore from "./store";
 
 import type { Paths } from "../utilities/types";
+import { SegmentOptions } from "../types/store";
 
 type UpdateProps<T> = Partial<Record<Extract<Paths<T>, string | number | symbol>, unknown>>;
 
@@ -14,15 +15,26 @@ class Segment<T extends Record<string, unknown>> {
   #name: string;
   #segmentValue: any;
   #watchers: Map<string, EventHandler>;
+  #options?: SegmentOptions;
 
-  constructor(name: string, defaultState: T) {
+  constructor(name: string, defaultState: T, options?: SegmentOptions) {
     this.#name = name;
     this.#segmentValue = this.flattenState(defaultState);
     this.#watchers = new Map();
     this.handleRecordToMainStore();
+    this.#options = options
   }
 
   //PRIVATE METHODS
+
+   //PRIVATE METHODS
+   #setToLocalStorage<T>(name: string, value: Segment<T extends Record<string, unknown> ? T : never>){
+    localStorage.setItem(`sms:segemnt:${name}`, JSON.stringify(value))
+  }
+
+  #setToSession<T>(name: string, value: Segment<T extends Record<string, unknown> ? T : never>){
+    sessionStorage.setItem(`sms:segemnt:${name}`, JSON.stringify(value))
+  }
 
   private flattenState(val: Record<string, unknown>, parent: string = ""): Record<string, unknown> {
     return Object.keys(val).reduce<Record<string, unknown>>((newObj, key) => {
@@ -78,6 +90,14 @@ class Segment<T extends Record<string, unknown>> {
   }
 
   private handleRecordToMainStore() {
+    if(this.#options?.saveTo === "localStorage"){
+      this.#setToLocalStorage<T>(this.#name, this.#segmentValue)
+    }
+
+    if(this.#options?.saveTo === "sessionStorage"){
+      this.#setToSession<T>(this.#name, this.#segmentValue)
+    }
+
     smcStore.set<T>(this.#name, this);
   }
 
@@ -123,6 +143,10 @@ class Segment<T extends Record<string, unknown>> {
     return this.#segmentValue[segmentKey];
   }
 
+  set options(options: SegmentOptions){
+    this.#options = options
+  } 
+
   public update(updateObj: UpdateProps<T>) {
     const flattenedObject = this.flattenState(updateObj);
     Object.keys(flattenedObject).forEach((key) => {
@@ -146,7 +170,6 @@ class Segment<T extends Record<string, unknown>> {
     const keys = this.handleSegmentKeys(segmentKey);
     let watcher: EventHandler | undefined;
     let result: Record<string, any> = {};
-    console.log(keys);
     for (const key of keys) {
       const watcherName = `${this.#name}:${String(key)}`;
       watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });

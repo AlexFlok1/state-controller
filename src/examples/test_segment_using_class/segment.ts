@@ -10,7 +10,7 @@ export type Segment1 = {
 };
 
 //Init Segment
-const testSegment = new Segment<Segment1>("test segment", { test1: "test1", test2: "test2" });
+const testSegment = new Segment<Segment1>( "test segment", { test1: "test1", test2: "test2" });
 
 //get all values
 function getAll() {

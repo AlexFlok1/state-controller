@@ -4,4 +4,6 @@ type Paths<T> = T extends object
     }[keyof T]
   : never;
 
-export type { Paths };
+type Maybe<T> = T | null | undefined
+
+export type { Paths, Maybe };
