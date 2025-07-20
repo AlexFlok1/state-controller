@@ -4,6 +4,13 @@ type Paths<T> = T extends object
     }[keyof T]
   : never;
 
-type Maybe<T> = T | null | undefined
+  type DeepPartial<T> = T extends object
+  ? {
+      [K in keyof T]?: DeepPartial<T[K]>;
+    }
+  : T;
 
-export type { Paths, Maybe };
+type Maybe<T> = T | null | undefined
+type Safe<T> = T extends Record<string, unknown> ? T : never;
+
+export type { Paths, Maybe, DeepPartial, Safe };

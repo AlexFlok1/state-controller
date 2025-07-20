@@ -1,14 +1,14 @@
 import { EventHandler } from "./event";
 import smcStore from "./store";
 
-import type { Paths } from "../utilities/types";
+import type { Paths, Safe } from "../utilities/types";
 import { SegmentOptions } from "../types/store";
 
 type UpdateProps<T> = Partial<Record<Extract<Paths<T>, string | number | symbol>, unknown>>;
 
 type WatchParams<T> = {
   segmentKey: Paths<T>[];
-  callback: (args: Record<string, string>) => void;
+  callback: (args: Partial<Safe<T>>) => void;
 };
 
 class Segment<T extends Record<string, unknown>> {
@@ -19,13 +19,12 @@ class Segment<T extends Record<string, unknown>> {
 
   constructor(name: string, defaultState: T, options?: SegmentOptions) {
     this.#name = name;
-    this.#segmentValue = this.flattenState(defaultState);
+    this.#segmentValue = this.flattenState(defaultState) as T;
     this.#watchers = new Map();
     this.handleRecordToMainStore();
     this.#options = options
   }
 
-  //PRIVATE METHODS
 
    //PRIVATE METHODS
    #setToLocalStorage<T>(name: string, value: Segment<T extends Record<string, unknown> ? T : never>){
@@ -49,13 +48,11 @@ class Segment<T extends Record<string, unknown>> {
     }, {});
   }
 
-  private convertNestedKeyToObject(key: string, value: string): Record<string, any> {
-    const keys = key.split(".");
-    let nestedObj: Record<string, any> = { [keys[keys.length - 1]]: value };
-    for (let i = keys.length - 2; i >= 0; i--) {
-      nestedObj = { [keys[i]]: nestedObj };
-    }
-    return nestedObj;
+  private convertNestedKeyToObject(keys: string[] = [], value: string): Record<string, any> {
+    if(!keys.length){return []}
+    if(keys.length === 1){return {[keys[0]]: value}}
+    const topLayerKey = keys.shift()!
+    return {[topLayerKey]: this.convertNestedKeyToObject(keys, value)}
   }
 
   private deepMergeObjects(...objects: any[]) {
@@ -77,13 +74,13 @@ class Segment<T extends Record<string, unknown>> {
     return mergedObject;
   }
 
-  private stateToObject(val: Record<string, string>): Record<string, string> {
+  private stateToObject(val: Record<Paths<T>, any>): Partial<Safe<T>> {
     const res = Object.keys(val).map((key) => {
       const nestedKeys = key.split(".");
       if (nestedKeys.length > 1) {
-        return this.convertNestedKeyToObject(key, val[key]);
+        return this.convertNestedKeyToObject(nestedKeys, val[key as Paths<T>]);
       } else {
-        return { [key]: val[key] };
+        return { [key]: val[key as Paths<T>] };
       }
     });
     return this.deepMergeObjects(...res) ?? {};
@@ -117,7 +114,6 @@ class Segment<T extends Record<string, unknown>> {
         result = [...result, ...moreKeys] as Paths<T>[];
       }
     }
-
     return result;
   }
 
@@ -135,7 +131,7 @@ class Segment<T extends Record<string, unknown>> {
         .map((key) => ({ [key]: this.#segmentValue[key] }))
         .reduce((newObj, el) => {
           return { ...newObj, ...el };
-        }, {})
+        }, {}) as Record<Paths<T>, any>
     );
   }
 
@@ -169,14 +165,14 @@ class Segment<T extends Record<string, unknown>> {
   public watch({ segmentKey, callback }: WatchParams<T>) {
     const keys = this.handleSegmentKeys(segmentKey);
     let watcher: EventHandler | undefined;
-    let result: Record<string, any> = {};
+    let result: Record<Paths<T>, any> = {} as Record<Paths<T>, any>;
     for (const key of keys) {
       const watcherName = `${this.#name}:${String(key)}`;
       watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
       if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
       watcher.subscribe(() => {
         result = { ...result, [key]: this.get(key) };
-        callback(this.stateToObject(result as Record<string, string>));
+        callback(this.stateToObject(result));
       });
     }
   }

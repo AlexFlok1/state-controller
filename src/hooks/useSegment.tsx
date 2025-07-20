@@ -21,7 +21,7 @@ type SegementHookProps<T extends Record<string, unknown>> = InitSegmentHookProps
 type MaybeSegment<T> = Segment<T extends Record<string, unknown> ? T : never> | undefined;
 
 export default function useSegment<T extends Record<string, unknown>>(props: SegementHookProps<T>) {
-  const [segment, setSegment] = useState<MaybeSegment<T>>(undefined);
+  const [segment, setSegment] = useState<MaybeSegment<T>>();
   
   function getSegmentDefaultState(): T | undefined {
     if(props.options?.saveTo){
