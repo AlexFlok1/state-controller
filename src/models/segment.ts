@@ -1,4 +1,4 @@
-import smcStore from "./store";
+import SMCStore from "./store";
 
 import type { Paths, Safe } from "../utilities/types";
 import { SegmentOptions } from "../types/store";
@@ -109,7 +109,7 @@ class Segment<T extends Record<string, unknown>> {
       }
     }
 
-    smcStore.set<T>(this.#name, this);
+    SMCStore.set<T>(this.#name, this);
   }
 
   private handleSegmentKeys(keys: Paths<T>[]): Paths<T>[] {
@@ -217,7 +217,7 @@ class Segment<T extends Record<string, unknown>> {
 
       if (changedKeys.length > 0) {
         this.#snapshotCache.clear();
-        smcStore.set<T>(this.#name, this);
+        SMCStore.set<T>(this.#name, this);
         changedKeys.forEach((key) => this.notifyKeyListeners(key));
       }
     } finally {

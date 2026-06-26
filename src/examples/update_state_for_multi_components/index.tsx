@@ -1,3 +1,4 @@
+import React from "react";
 import { Button, Grid, Typography } from "@mui/material";
 
 import Comp1 from "./component1";

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Segment from "../models/segment";
-import smcStore from "../models/store";
+import SMCStore from "../models/store";
 import { SegmentOptions } from "../types/store";
 import {TempStorage} from "../services/TempStorage"
 
@@ -37,7 +37,7 @@ export default function useSegment<T extends Record<string, unknown>>(props: Seg
   }
 
   useEffect(() => {
-    let storedSegment = smcStore.get<T>(props.name);
+    let storedSegment = SMCStore.get<T>(props.name);
 
     if (storedSegment && props.defaultValue && Object.keys(storedSegment.getValues()).length === 0) {
       storedSegment.update(getSegmentDefaultState() ?? {});
@@ -49,7 +49,7 @@ export default function useSegment<T extends Record<string, unknown>>(props: Seg
       const initial = getSegmentDefaultState();
      
       storedSegment = new Segment<T>(props.name, initial ?? {} as T, props.options ?? {});
-      if (storedSegment) {smcStore.set(props.name, storedSegment as any);};
+      if (storedSegment) {SMCStore.set(props.name, storedSegment as any);};
       if(initial){saveSegmentValue(initial)}
     }
 

@@ -1,5 +1,5 @@
 import { SEGMENT_STORAGE_PREFIX } from "../constants/storage";
-import smcStore from "../models/store";
+import SMCStore from "../models/store";
 
 let initialized = false;
 
@@ -16,7 +16,7 @@ function initCrossTabSync() {
     }
 
     const segmentName = event.key.slice(SEGMENT_STORAGE_PREFIX.length);
-    const segment = smcStore.get(segmentName);
+    const segment = SMCStore.get(segmentName);
 
     if (!segment || segment.persistTo !== "localStorage") {
       return;

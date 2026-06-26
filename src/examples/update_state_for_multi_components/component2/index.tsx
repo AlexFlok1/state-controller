@@ -1,3 +1,4 @@
+import React from "react";
 import useSegment from "../../../hooks/useSegment";
 import useWatchSegment from "../../../hooks/useWatchSegment";
 import { Button, Typography } from "@mui/material";

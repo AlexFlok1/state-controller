@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
-import smcStore from "../models/store";
+import SMCStore from "../models/store";
 import type { Paths, Safe } from "../utilities/types";
 import { SegmentOptions } from "../types/store";
 import useSegment from "./useSegment";
@@ -38,8 +38,8 @@ export default function useWatchSegment<T extends Record<string, unknown>>(
 
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
-      const unsubStore = smcStore.subscribe(onStoreChange);
-      const segment = smcStore.get<T>(name);
+      const unsubStore = SMCStore.subscribe(onStoreChange);
+      const segment = SMCStore.get<T>(name);
       const unsubSegment = segment?.subscribe(segmentKeys, onStoreChange) ?? (() => {});
 
       return () => {
@@ -51,7 +51,7 @@ export default function useWatchSegment<T extends Record<string, unknown>>(
   );
 
   const getSnapshot = useCallback((): Partial<Safe<T>> => {
-    const segment = smcStore.get<T>(name);
+    const segment = SMCStore.get<T>(name);
     if (!segment) {
       return EMPTY_SNAPSHOT as Partial<Safe<T>>;
     }
