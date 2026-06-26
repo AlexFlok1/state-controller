@@ -1,8 +1,9 @@
-import { EventHandler } from "./event";
 import smcStore from "./store";
 
 import type { Paths, Safe } from "../utilities/types";
 import { SegmentOptions } from "../types/store";
+import { SEGMENT_STORAGE_PREFIX } from "../constants/storage";
+import { snapshotsEqual } from "../utilities/snapshot";
 
 type UpdateProps<T> = Partial<Record<Extract<Paths<T>, string | number | symbol>, unknown>>;
 
@@ -14,30 +15,32 @@ type WatchParams<T> = {
 class Segment<T extends Record<string, unknown>> {
   #name: string;
   #segmentValue: any;
-  #watchers: Map<string, EventHandler>;
+  #keyListeners: Map<string, Set<() => void>>;
+  #snapshotCache: Map<string, Partial<Safe<T>>>;
   #options?: SegmentOptions;
+  #skipPersist = false;
 
   constructor(name: string, defaultState: T, options?: SegmentOptions) {
     this.#name = name;
     this.#segmentValue = this.flattenState(defaultState) as T;
-    this.#watchers = new Map();
+    this.#keyListeners = new Map();
+    this.#snapshotCache = new Map();
     this.handleRecordToMainStore();
-    this.#options = options
+    this.#options = options;
   }
 
-
-   //PRIVATE METHODS
-   #setToLocalStorage<T>(name: string, value: Segment<T extends Record<string, unknown> ? T : never>){
-    localStorage.setItem(`sms:segemnt:${name}`, JSON.stringify(value))
+  //PRIVATE METHODS
+  #setToLocalStorage(name: string, value: Record<string, unknown>) {
+    localStorage.setItem(`${SEGMENT_STORAGE_PREFIX}${name}`, JSON.stringify(value));
   }
 
-  #setToSession<T>(name: string, value: Segment<T extends Record<string, unknown> ? T : never>){
-    sessionStorage.setItem(`sms:segemnt:${name}`, JSON.stringify(value))
+  #setToSession(name: string, value: Record<string, unknown>) {
+    sessionStorage.setItem(`${SEGMENT_STORAGE_PREFIX}${name}`, JSON.stringify(value));
   }
 
   private flattenState(val: Record<string, unknown>, parent: string = ""): Record<string, unknown> {
     return Object.keys(val).reduce<Record<string, unknown>>((newObj, key) => {
-      if (typeof val[key] === "object" && !Array.isArray(val[key])) {
+      if (typeof val[key] === "object" && !Array.isArray(val[key]) && val[key] !== null) {
         return {
           ...newObj,
           ...this.flattenState(val[key] as Record<string, unknown>, `${parent ? `${parent}.${key}` : `${key}`}`),
@@ -49,10 +52,14 @@ class Segment<T extends Record<string, unknown>> {
   }
 
   private convertNestedKeyToObject(keys: string[] = [], value: string): Record<string, any> {
-    if(!keys.length){return []}
-    if(keys.length === 1){return {[keys[0]]: value}}
-    const topLayerKey = keys.shift()!
-    return {[topLayerKey]: this.convertNestedKeyToObject(keys, value)}
+    if (!keys.length) {
+      return [];
+    }
+    if (keys.length === 1) {
+      return { [keys[0]]: value };
+    }
+    const topLayerKey = keys.shift()!;
+    return { [topLayerKey]: this.convertNestedKeyToObject(keys, value) };
   }
 
   private deepMergeObjects(...objects: any[]) {
@@ -86,20 +93,23 @@ class Segment<T extends Record<string, unknown>> {
     return this.deepMergeObjects(...res) ?? {};
   }
 
-  private handleRecordToMainStore() {
-    if(this.#options?.saveTo === "localStorage"){
-      this.#setToLocalStorage<T>(this.#name, this.#segmentValue)
-    }
+  private notifyKeyListeners(key: string) {
+    const watcherName = `${this.#name}:${String(key)}`;
+    this.#keyListeners.get(watcherName)?.forEach((listener) => listener());
+  }
 
-    if(this.#options?.saveTo === "sessionStorage"){
-      this.#setToSession<T>(this.#name, this.#segmentValue)
+  private handleRecordToMainStore() {
+    if (!this.#skipPersist) {
+      if (this.#options?.saveTo === "localStorage") {
+        this.#setToLocalStorage(this.#name, this.#segmentValue);
+      }
+
+      if (this.#options?.saveTo === "sessionStorage") {
+        this.#setToSession(this.#name, this.#segmentValue);
+      }
     }
 
     smcStore.set<T>(this.#name, this);
-  }
-
-  private isWatcherExsistAlready(key: string): EventHandler | undefined {
-    return this.#watchers.get(key);
   }
 
   private handleSegmentKeys(keys: Paths<T>[]): Paths<T>[] {
@@ -119,7 +129,13 @@ class Segment<T extends Record<string, unknown>> {
 
   //PUBLIC METHODS
 
-  //TODO: add ability to support set of keys
+  public get segmentName() {
+    return this.#name;
+  }
+
+  public get persistTo() {
+    return this.#options?.saveTo;
+  }
 
   public getValues(segmentKeys: Paths<T>[] = []) {
     if (segmentKeys.length === 0) {
@@ -135,46 +151,90 @@ class Segment<T extends Record<string, unknown>> {
     );
   }
 
+  public getStableSnapshot(segmentKeys: Paths<T>[]): Partial<Safe<T>> {
+    const cacheKey = segmentKeys.join("|");
+    const fresh = this.getValues(segmentKeys);
+    const cached = this.#snapshotCache.get(cacheKey);
+
+    if (cached && snapshotsEqual(cached as Record<string, unknown>, fresh as Record<string, unknown>)) {
+      return cached;
+    }
+
+    this.#snapshotCache.set(cacheKey, fresh);
+    return fresh;
+  }
+
   public get(segmentKey: Paths<T>) {
     return this.#segmentValue[segmentKey];
   }
 
-  set options(options: SegmentOptions){
-    this.#options = options
-  } 
+  set options(options: SegmentOptions) {
+    this.#options = options;
+  }
+
+  public subscribe(segmentKeys: Paths<T>[], listener: () => void): () => void {
+    const keys = this.handleSegmentKeys(segmentKeys);
+
+    for (const key of keys) {
+      const watcherName = `${this.#name}:${String(key)}`;
+      if (!this.#keyListeners.has(watcherName)) {
+        this.#keyListeners.set(watcherName, new Set());
+      }
+      this.#keyListeners.get(watcherName)!.add(listener);
+    }
+
+    return () => {
+      for (const key of keys) {
+        const watcherName = `${this.#name}:${String(key)}`;
+        this.#keyListeners.get(watcherName)?.delete(listener);
+      }
+    };
+  }
 
   public update(updateObj: UpdateProps<T>) {
     const flattenedObject = this.flattenState(updateObj);
     Object.keys(flattenedObject).forEach((key) => {
       if (this.#segmentValue[key] !== flattenedObject[key]) {
         this.#segmentValue[key] = flattenedObject[key];
-        const watcher = this.#watchers.get(`${this.#name}:${String(key)}`);
-        if (watcher) {
-          watcher.dispatch();
-        }
+        this.#snapshotCache.clear();
+        this.notifyKeyListeners(key);
       }
       this.handleRecordToMainStore();
     });
   }
 
+  public hydrateFromFlattenedState(flatState: Record<string, unknown>) {
+    this.#skipPersist = true;
+    try {
+      const changedKeys: string[] = [];
+
+      Object.keys(flatState).forEach((key) => {
+        if (this.#segmentValue[key] !== flatState[key]) {
+          this.#segmentValue[key] = flatState[key];
+          changedKeys.push(key);
+        }
+      });
+
+      if (changedKeys.length > 0) {
+        this.#snapshotCache.clear();
+        smcStore.set<T>(this.#name, this);
+        changedKeys.forEach((key) => this.notifyKeyListeners(key));
+      }
+    } finally {
+      this.#skipPersist = false;
+    }
+  }
+
   public delete(segmentKey: keyof T) {
     delete this.#segmentValue[segmentKey];
+    this.#snapshotCache.clear();
     this.handleRecordToMainStore();
   }
 
-  public watch({ segmentKey, callback }: WatchParams<T>) {
-    const keys = this.handleSegmentKeys(segmentKey);
-    let watcher: EventHandler | undefined;
-    let result: Record<Paths<T>, any> = {} as Record<Paths<T>, any>;
-    for (const key of keys) {
-      const watcherName = `${this.#name}:${String(key)}`;
-      watcher = this.isWatcherExsistAlready(watcherName) ?? new EventHandler({ name: watcherName });
-      if (!this.#watchers.has(watcherName)) this.#watchers.set(watcherName, watcher);
-      watcher.subscribe(() => {
-        result = { ...result, [key]: this.get(key) };
-        callback(this.stateToObject(result));
-      });
-    }
+  public watch({ segmentKey, callback }: WatchParams<T>): () => void {
+    return this.subscribe(segmentKey, () => {
+      callback(this.getValues(segmentKey));
+    });
   }
 }
 

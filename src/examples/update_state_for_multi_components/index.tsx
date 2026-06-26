@@ -1,22 +1,22 @@
-import React from "react";
-import { Button, Grid } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 
 import Comp1 from "./component1";
 import Comp2 from "./component2";
 import useSegment from "../../hooks/useSegment";
-//import { useSegment } from "state-watch/dist";
 import Comp3 from "./component3";
 
 type Segment2 = { val1: string; val2: string };
 
 const Example1 = (): JSX.Element => {
-
   const segment1 = useSegment({
-    name:"Segment1", defaultValue:{
-    val1: "test1",
-    val2: "test2",
-    val3: { nestedVal: "nested value", test: "cool1", secondNested: { val4: "test4" } },
-  }});
+    name: "Segment1",
+    defaultValue: {
+      val1: "test1",
+      val2: "test2",
+      val3: { nestedVal: "nested value", test: "cool1", secondNested: { val4: "test4" } },
+    },
+  });
+
   const handleTestAction = () => {
     segment1?.update({
       "val3.nestedVal": "test5",
@@ -25,17 +25,19 @@ const Example1 = (): JSX.Element => {
     });
   };
 
-  const segment2 = useSegment<Segment2>({ name: "Segment2" });
-
-  segment2?.watch({
-    segmentKey: ["val1", "val2"],
-    callback: (val) => {
-      console.log(val);
-    },
+  useSegment<Segment2>({
+    name: "Segment2",
+    defaultValue: { val1: "test1", val2: "test2" },
+    options: { saveTo: "localStorage" },
   });
 
   return (
     <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant="caption" color="text.secondary">
+          Segment2 uses localStorage — open this page in two tabs and click &quot;Update Segment2&quot; to see cross-tab sync.
+        </Typography>
+      </Grid>
       <Grid item xs={12}>
         <Comp1 />
       </Grid>

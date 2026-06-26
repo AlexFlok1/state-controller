@@ -1,7 +1,5 @@
-import React from "react";
-import { useState } from "react";
 import useSegment from "../../../hooks/useSegment";
-//import { useSegment } from "state-watch/dist";
+import useWatchSegment from "../../../hooks/useWatchSegment";
 import { Button, Typography } from "@mui/material";
 
 type Segment1 = {
@@ -11,16 +9,15 @@ type Segment1 = {
 };
 
 const Comp2 = () => {
-  const [val, setVal] = useState<Record<string, any>>();
+  const val = useWatchSegment<Segment1>({
+    name: "Segment1",
+    segmentKeys: ["val3.nestedVal", "val2", "val3.secondNested.val4"],
+  });
 
-  const segment1 = useSegment<Segment1>({ name: "Segment1"});
-  const segment2 = useSegment({name: "Segment2", defaultValue: { val1: "test1", val2: "test2" }})
-
-  segment1?.watch({
-    segmentKey: ["val3.nestedVal", "val2", "val3.secondNested.val4"],
-    callback: (val) => {
-      setVal(val);
-    },
+  const segment2 = useSegment({
+    name: "Segment2",
+    defaultValue: { val1: "test1", val2: "test2" },
+    options: { saveTo: "localStorage" },
   });
 
   const handleTestAction = () => {
@@ -30,10 +27,10 @@ const Comp2 = () => {
   return (
     <>
       <Typography variant="body2">
-        Trak Segment 1 data in component 2 <code>{JSON.stringify(val ?? segment1?.getValues(["val3.nestedVal"]))}</code>
+        Track Segment 1 data in component 2 <code>{JSON.stringify(val)}</code>
       </Typography>
       <Button variant="contained" style={{ width: "250px" }} onClick={handleTestAction}>
-        Update Segment2
+        Update Segment2 (syncs across tabs)
       </Button>
     </>
   );
